@@ -1,0 +1,1545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Studio — CRM</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F4F2EE;
+      --surface: #FFFFFF;
+      --surface2: #F9F8F6;
+      --border: rgba(0,0,0,0.1);
+      --border-med: rgba(0,0,0,0.18);
+      --text: #1A1916;
+      --text-2: #6B6860;
+      --text-3: #9B9890;
+      --accent: #1A1916;
+      --green: #0F6E56;
+      --green-light: #E1F5EE;
+      --blue: #185FA5;
+      --blue-light: #E6F1FB;
+      --purple: #534AB7;
+      --purple-light: #EEEDFE;
+      --amber: #854F0B;
+      --amber-light: #FAEEDA;
+      --teal: #085041;
+      --teal-light: #D0EDE5;
+      --red: #A32D2D;
+      --red-light: #FCEBEB;
+      --grey-light: #F1EFE8;
+      --radius: 10px;
+      --radius-sm: 6px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1), 0 2px 4px rgba(0,0,0,0.06);
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* LAYOUT */
+    .app { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 100;
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-logo h1 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+
+    .sidebar-logo span {
+      font-size: 11px;
+      color: var(--text-3);
+      font-weight: 400;
+      letter-spacing: 0.04em;
+    }
+
+    .sidebar-nav { padding: 12px 10px; flex: 1; }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      color: var(--text-2);
+      font-size: 13px;
+      font-weight: 400;
+      transition: all 0.15s;
+      border: none;
+      background: none;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-item:hover { background: var(--surface2); color: var(--text); }
+    .nav-item.active { background: var(--text); color: white; font-weight: 500; }
+
+    .nav-icon { font-size: 15px; width: 18px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-3);
+    }
+
+    .main { margin-left: 220px; flex: 1; }
+
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 28px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .topbar-title { font-size: 15px; font-weight: 500; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--text);
+      color: white;
+    }
+    .btn-primary:hover { background: #333; }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-2);
+      border: 1px solid var(--border-med);
+    }
+    .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+    /* AUTH */
+    .auth-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg);
+    }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 40px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .auth-card h2 { font-size: 20px; font-weight: 500; margin-bottom: 6px; }
+    .auth-card p { font-size: 13px; color: var(--text-2); margin-bottom: 28px; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 5px; letter-spacing: 0.02em; }
+
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border-med);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-family: inherit;
+      background: var(--surface);
+      color: var(--text);
+      transition: border 0.15s;
+      outline: none;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--text);
+    }
+
+    .form-textarea { resize: vertical; min-height: 80px; }
+
+    .error-msg {
+      background: var(--red-light);
+      color: var(--red);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      margin-bottom: 16px;
+    }
+
+    /* KANBAN */
+    .kanban-wrap { padding: 24px 28px; overflow-x: auto; }
+
+    .kanban-board {
+      display: flex;
+      gap: 12px;
+      min-width: max-content;
+      align-items: flex-start;
+    }
+
+    .kanban-col {
+      width: 240px;
+      flex-shrink: 0;
+    }
+
+    .col-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      margin-bottom: 8px;
+    }
+
+    .col-title-wrap { display: flex; align-items: center; gap: 8px; }
+
+    .col-pip {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+
+    .col-title { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+    .col-count {
+      font-size: 11px;
+      color: var(--text-3);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1px 7px;
+    }
+
+    .col-total {
+      font-size: 11px;
+      color: var(--text-2);
+      padding: 0 12px 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .col-total strong { color: var(--text); font-weight: 500; }
+
+    .col-body {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 8px;
+      min-height: 120px;
+      transition: background 0.15s;
+    }
+
+    .col-body.drag-over { background: #EBF0FA; border-color: var(--blue); }
+
+    /* DEAL CARD */
+    .deal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px;
+      margin-bottom: 8px;
+      cursor: grab;
+      transition: box-shadow 0.15s, transform 0.15s;
+      position: relative;
+    }
+
+    .deal-card:hover { box-shadow: var(--shadow-md); }
+    .deal-card:active { cursor: grabbing; }
+    .deal-card.dragging { opacity: 0.5; transform: rotate(1deg); }
+    .deal-card.won-card { border-left: 3px solid var(--green); }
+    .deal-card.production-card { border-left: 3px solid var(--teal); }
+    .deal-card.lost-card { opacity: 0.65; border-left: 3px solid var(--red); }
+
+    .card-num { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; margin-bottom: 3px; }
+    .card-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; line-height: 1.3; }
+    .card-client { font-size: 11px; color: var(--text-2); margin-bottom: 8px; }
+
+    .card-fee { font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
+    .card-fee-sub { font-size: 10px; color: var(--text-3); }
+
+    .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+
+    .type-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .badge-avr { background: var(--purple-light); color: var(--purple); }
+    .badge-cgi { background: var(--green-light); color: var(--green); }
+    .badge-animation { background: var(--blue-light); color: var(--blue); }
+    .badge-masterplan { background: var(--amber-light); color: var(--amber); }
+    .badge-consultation { background: var(--teal-light); color: var(--teal); }
+    .badge-other { background: var(--grey-light); color: var(--text-2); }
+
+    .info-toggle {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
+    }
+
+    .info-received { background: var(--green-light); color: var(--green); }
+    .info-awaiting { background: var(--amber-light); color: var(--amber); }
+
+    .chase-dot {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--amber);
+    }
+
+    .chase-dot::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--amber);
+      flex-shrink: 0;
+    }
+
+    .card-actions {
+      position: absolute;
+      top: 8px; right: 8px;
+      display: none;
+      gap: 4px;
+    }
+
+    .deal-card:hover .card-actions { display: flex; }
+
+    .card-action-btn {
+      width: 22px; height: 22px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-2);
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-action-btn:hover { background: var(--surface2); color: var(--text); }
+
+    .add-card-btn {
+      width: 100%;
+      padding: 8px;
+      border: 1px dashed var(--border-med);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-3);
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      font-family: inherit;
+      margin-top: 4px;
+    }
+
+    .add-card-btn:hover { background: var(--surface); color: var(--text-2); border-color: var(--text-3); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 580px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-md);
+    }
+
+    .modal-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 1;
+    }
+
+    .modal-header h3 { font-size: 15px; font-weight: 500; }
+    .modal-close {
+      width: 28px; height: 28px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-2);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-body { padding: 20px 24px; }
+    .modal-footer {
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      position: sticky;
+      bottom: 0;
+      background: var(--surface);
+    }
+
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .form-section { margin-bottom: 20px; }
+    .form-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* STAGE TABS IN MODAL */
+    .stage-indicator {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stage-tab {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      background: transparent;
+      color: var(--text-2);
+    }
+
+    .stage-tab.active-stage { background: var(--text); color: white; border-color: var(--text); }
+
+    /* FEE ALLOCATION */
+    .fee-alloc { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-top: 8px; }
+    .fee-alloc-title { font-size: 11px; font-weight: 600; color: var(--text-2); margin-bottom: 10px; letter-spacing: 0.03em; }
+    .fee-alloc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .fee-alloc-total { font-size: 11px; color: var(--text-2); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+    .fee-alloc-total strong { color: var(--text); }
+
+    /* CHECKBOXES */
+    .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+    .checkbox-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; }
+    .checkbox-item input { width: 15px; height: 15px; cursor: pointer; accent-color: var(--text); }
+
+    /* CONTACTS PAGE */
+    .page-wrap { padding: 28px; }
+    .contacts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 20px; }
+
+    .contact-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: box-shadow 0.15s;
+    }
+
+    .contact-card:hover { box-shadow: var(--shadow-md); }
+
+    .contact-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--blue-light);
+      color: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .contact-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .contact-name { font-size: 14px; font-weight: 500; }
+    .contact-role { font-size: 12px; color: var(--text-2); }
+    .contact-company { font-size: 12px; color: var(--text-2); margin-bottom: 8px; }
+
+    .tag-list { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+    .tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--grey-light);
+      color: var(--text-2);
+    }
+
+    .source-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--purple-light);
+      color: var(--purple);
+      font-weight: 500;
+    }
+
+    /* SEARCH */
+    .search-bar {
+      position: relative;
+      max-width: 300px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 8px 12px 8px 32px;
+      border: 1px solid var(--border-med);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      font-family: inherit;
+    }
+
+    .search-bar input:focus { border-color: var(--text); }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+      font-size: 13px;
+      pointer-events: none;
+    }
+
+    /* LOADING */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--text-3);
+      font-size: 13px;
+    }
+
+    /* EMPTY STATE */
+    .empty {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-3);
+      font-size: 12px;
+    }
+
+    /* TOPBAR ACTIONS */
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    .user-pill {
+      font-size: 12px;
+      color: var(--text-2);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+    }
+
+    /* STAGE COLORS */
+    .pip-enquiry { background: #888780; }
+    .pip-quoted { background: var(--blue); }
+    .pip-pending { background: var(--purple); }
+    .pip-won { background: var(--green); }
+    .pip-production { background: var(--teal); }
+    .pip-lost { background: var(--red); }
+
+    /* TAGS INPUT */
+    .tags-input-wrap { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 8px; border: 1px solid var(--border-med); border-radius: var(--radius-sm); min-height: 38px; cursor: text; }
+    .tags-input-wrap:focus-within { border-color: var(--text); }
+    .tags-input-wrap input { border: none; outline: none; font-size: 13px; font-family: inherit; background: transparent; min-width: 80px; flex: 1; }
+    .tag-item { display: flex; align-items: center; gap: 4px; background: var(--grey-light); padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+    .tag-remove { cursor: pointer; color: var(--text-3); font-size: 13px; line-height: 1; border: none; background: none; padding: 0; }
+
+    /* SCROLLBAR */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-med); border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { createClient } = supabase;
+    const { useState, useEffect, useRef, useCallback } = React;
+
+    const SUPABASE_URL = 'https://bhqmrgpoyzptaztziowx.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJocW1yZ3BveXpwdGF6dHppb3d4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU5MTc0MzAsImV4cCI6MjA5MTQ5MzQzMH0.33rQYg18vj-NNPEWiFqQ5SuxL0Fykf0eOeMANzNkjjg';
+    const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const STAGES = ['Enquiry','Quoted','Pending Likely','Won','Production','Lost'];
+    const PROJECT_TYPES = ['AVR','CGI','Animation','Masterplan','Consultation Tool','Other'];
+    const LOST_REASONS = ['Preferred Supplier','Cost','Project Cancelled','Timing / On Hold'];
+    const OWNERS = ['Sam','Nick','Maisie'];
+    const CONTACT_TYPES = ['Client','Prospect','Consultant','Referrer','Supplier'];
+    const SOURCES = ['MIPIM','Referral','LinkedIn','Inbound','Event','Other'];
+    const COMPANY_TYPES = ['Developer','Architect','PRS','Housing Association','Contractor','Planning Consultancy','Other'];
+    const REGIONS = ['North West','Yorkshire','Midlands','London','National','Other'];
+
+    const MONTHS = (() => {
+      const m = [];
+      const now = new Date();
+      for (let i = -2; i < 18; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+        m.push(d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }));
+      }
+      return m;
+    })();
+
+    function fmt(n) {
+      if (!n && n !== 0) return '—';
+      return '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    }
+
+    function initials(name) {
+      if (!name) return '?';
+      return name.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+    }
+
+    function typeBadgeClass(t) {
+      const map = { AVR: 'badge-avr', CGI: 'badge-cgi', Animation: 'badge-animation', Masterplan: 'badge-masterplan', 'Consultation Tool': 'badge-consultation' };
+      return map[t] || 'badge-other';
+    }
+
+    function isChaseToday(date) {
+      if (!date) return false;
+      const today = new Date().toISOString().slice(0,10);
+      return date <= today;
+    }
+
+    // =====================
+    // AUTH
+    // =====================
+    function AuthScreen({ onAuth }) {
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+      const [loading, setLoading] = useState(false);
+      const [error, setError] = useState('');
+
+      async function handleLogin(e) {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        const { error } = await db.auth.signInWithPassword({ email, password });
+        if (error) setError(error.message);
+        setLoading(false);
+      }
+
+      return (
+        <div className="auth-wrap">
+          <div className="auth-card">
+            <div style={{marginBottom: 24}}>
+              <h2>Our Studio</h2>
+              <p>Sign in to the CRM</p>
+            </div>
+            {error && <div className="error-msg">{error}</div>}
+            <form onSubmit={handleLogin}>
+              <div className="form-group">
+                <label className="form-label">Email</label>
+                <input className="form-input" type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="you@ourstudioltd.co.uk" />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Password</label>
+                <input className="form-input" type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
+              </div>
+              <button className="btn btn-primary" style={{width:'100%', marginTop: 4}} type="submit" disabled={loading}>
+                {loading ? 'Signing in…' : 'Sign in'}
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================
+    // TAGS INPUT
+    // =====================
+    function TagsInput({ value = [], onChange }) {
+      const [input, setInput] = useState('');
+      function add(tag) {
+        const t = tag.trim();
+        if (t && !value.includes(t)) onChange([...value, t]);
+        setInput('');
+      }
+      function remove(tag) { onChange(value.filter(t => t !== tag)); }
+      function onKey(e) {
+        if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); add(input); }
+        if (e.key === 'Backspace' && !input && value.length) remove(value[value.length-1]);
+      }
+      return (
+        <div className="tags-input-wrap" onClick={e => e.currentTarget.querySelector('input').focus()}>
+          {value.map(t => (
+            <span key={t} className="tag-item">
+              {t}
+              <button className="tag-remove" onClick={() => remove(t)}>×</button>
+            </span>
+          ))}
+          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKey} placeholder={value.length ? '' : 'Type and press enter…'} />
+        </div>
+      );
+    }
+
+    // =====================
+    // DEAL MODAL
+    // =====================
+    function DealModal({ deal, companies, contacts, onSave, onClose, initialStage }) {
+      const isNew = !deal?.id;
+      const [form, setForm] = useState(deal || {
+        stage: initialStage || 'Enquiry',
+        info_status: 'Awaiting Info',
+        project_type: '',
+        scope: '',
+        project_name: '',
+        company_id: '',
+        contact_id: '',
+        production_fee: '',
+        supplier_fee: '',
+        follow_up_date: '',
+        fee_month_1_label: '',
+        fee_month_1_amount: '',
+        fee_month_2_label: '',
+        fee_month_2_amount: '',
+        fee_month_3_label: '',
+        fee_month_3_amount: '',
+        start_month: '',
+        delivery_month: '',
+        start_date: '',
+        delivery_date: '',
+        lost_reason: [],
+        owner: 'Sam',
+        notes: '',
+      });
+      const [saving, setSaving] = useState(false);
+
+      function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
+
+      function toggleLostReason(r) {
+        const cur = form.lost_reason || [];
+        set('lost_reason', cur.includes(r) ? cur.filter(x => x !== r) : [...cur, r]);
+      }
+
+      const allocTotal = [form.fee_month_1_amount, form.fee_month_2_amount, form.fee_month_3_amount]
+        .reduce((s, v) => s + (parseFloat(v) || 0), 0);
+
+      async function handleSave() {
+        setSaving(true);
+        const payload = { ...form };
+        Object.keys(payload).forEach(k => { if (payload[k] === '') payload[k] = null; });
+        if (isNew) {
+          const { error } = await db.from('deals').insert(payload);
+          if (!error) onSave();
+        } else {
+          const { error } = await db.from('deals').update(payload).eq('id', form.id);
+          if (!error) onSave();
+        }
+        setSaving(false);
+      }
+
+      const stage = form.stage;
+      const showFinancials = ['Quoted','Pending Likely','Won','Production','Lost'].includes(stage);
+      const showPending = stage === 'Pending Likely';
+      const showWon = ['Won','Production'].includes(stage);
+      const showProduction = stage === 'Production';
+      const showLost = stage === 'Lost';
+
+      return (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+          <div className="modal">
+            <div className="modal-header">
+              <div>
+                <h3>{isNew ? 'New deal' : `Edit — ${form.project_name || 'Untitled'}`}</h3>
+                {form.project_number && <div style={{fontSize:11,color:'var(--text-3)',fontFamily:'DM Mono',marginTop:2}}>#{form.project_number}</div>}
+              </div>
+              <button className="modal-close" onClick={onClose}>×</button>
+            </div>
+            <div className="modal-body">
+
+              {/* Stage selector */}
+              <div className="form-section">
+                <div className="form-section-title">Stage</div>
+                <div className="stage-indicator">
+                  {STAGES.map(s => (
+                    <button key={s} className={`stage-tab ${form.stage === s ? 'active-stage' : ''}`} onClick={() => set('stage', s)}>{s}</button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Core */}
+              <div className="form-section">
+                <div className="form-section-title">Project</div>
+                <div className="form-group">
+                  <label className="form-label">Project name</label>
+                  <input className="form-input" value={form.project_name || ''} onChange={e => set('project_name', e.target.value)} placeholder="e.g. Salford Quays resi tower" />
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Client company</label>
+                    <select className="form-select" value={form.company_id || ''} onChange={e => set('company_id', e.target.value)}>
+                      <option value="">Select company…</option>
+                      {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Client contact</label>
+                    <select className="form-select" value={form.contact_id || ''} onChange={e => set('contact_id', e.target.value)}>
+                      <option value="">Select contact…</option>
+                      {contacts.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Project type</label>
+                    <select className="form-select" value={form.project_type || ''} onChange={e => set('project_type', e.target.value)}>
+                      <option value="">Select type…</option>
+                      {PROJECT_TYPES.map(t => <option key={t}>{t}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Owner</label>
+                    <select className="form-select" value={form.owner || 'Sam'} onChange={e => set('owner', e.target.value)}>
+                      {OWNERS.map(o => <option key={o}>{o}</option>)}
+                    </select>
+                  </div>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Scope / no. of images</label>
+                  <input className="form-input" value={form.scope || ''} onChange={e => set('scope', e.target.value)} placeholder="e.g. 4 CGIs, 2 verified views" />
+                </div>
+                {stage === 'Enquiry' && (
+                  <div className="form-group">
+                    <label className="form-label">Info status</label>
+                    <select className="form-select" value={form.info_status || 'Awaiting Info'} onChange={e => set('info_status', e.target.value)}>
+                      <option>Awaiting Info</option>
+                      <option>Info Received</option>
+                    </select>
+                  </div>
+                )}
+              </div>
+
+              {/* Financials */}
+              {showFinancials && (
+                <div className="form-section">
+                  <div className="form-section-title">Fees</div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="form-label">Production fee (ex. VAT)</label>
+                      <input className="form-input" type="number" value={form.production_fee || ''} onChange={e => set('production_fee', e.target.value)} placeholder="0.00" />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Supplier fee</label>
+                      <input className="form-input" type="number" value={form.supplier_fee || ''} onChange={e => set('supplier_fee', e.target.value)} placeholder="0.00" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Pending likely */}
+              {showPending && (
+                <div className="form-section">
+                  <div className="form-section-title">Follow-up</div>
+                  <div className="form-group">
+                    <label className="form-label">Follow-up reminder date</label>
+                    <input className="form-input" type="date" value={form.follow_up_date || ''} onChange={e => set('follow_up_date', e.target.value)} />
+                  </div>
+                </div>
+              )}
+
+              {/* Won */}
+              {showWon && (
+                <div className="form-section">
+                  <div className="form-section-title">Revenue allocation</div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="form-label">Start month</label>
+                      <select className="form-select" value={form.start_month || ''} onChange={e => set('start_month', e.target.value)}>
+                        <option value="">Select…</option>
+                        {MONTHS.map(m => <option key={m}>{m}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Delivery month</label>
+                      <select className="form-select" value={form.delivery_month || ''} onChange={e => set('delivery_month', e.target.value)}>
+                        <option value="">Select…</option>
+                        {MONTHS.map(m => <option key={m}>{m}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                  <div className="fee-alloc">
+                    <div className="fee-alloc-title">Split production fee across months</div>
+                    {[1,2,3].map(i => (
+                      <div key={i} className="fee-alloc-row">
+                        <select className="form-select" value={form[`fee_month_${i}_label`] || ''} onChange={e => set(`fee_month_${i}_label`, e.target.value)}>
+                          <option value="">Month {i}…</option>
+                          {MONTHS.map(m => <option key={m}>{m}</option>)}
+                        </select>
+                        <input className="form-input" type="number" placeholder="£0" value={form[`fee_month_${i}_amount`] || ''} onChange={e => set(`fee_month_${i}_amount`, e.target.value)} />
+                      </div>
+                    ))}
+                    <div className="fee-alloc-total">
+                      Allocated: <strong>{fmt(allocTotal)}</strong>
+                      {form.production_fee && allocTotal !== parseFloat(form.production_fee) && (
+                        <span style={{color:'var(--amber)',marginLeft:8}}>
+                          ≠ production fee ({fmt(form.production_fee)})
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Production */}
+              {showProduction && (
+                <div className="form-section">
+                  <div className="form-section-title">Production dates</div>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label className="form-label">Start date</label>
+                      <input className="form-input" type="date" value={form.start_date || ''} onChange={e => set('start_date', e.target.value)} />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">Delivery date</label>
+                      <input className="form-input" type="date" value={form.delivery_date || ''} onChange={e => set('delivery_date', e.target.value)} />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Lost */}
+              {showLost && (
+                <div className="form-section">
+                  <div className="form-section-title">Lost reason</div>
+                  <div className="checkbox-group">
+                    {LOST_REASONS.map(r => (
+                      <label key={r} className="checkbox-item">
+                        <input type="checkbox" checked={(form.lost_reason || []).includes(r)} onChange={() => toggleLostReason(r)} />
+                        {r}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Notes */}
+              <div className="form-section">
+                <div className="form-section-title">Notes</div>
+                <textarea className="form-textarea" value={form.notes || ''} onChange={e => set('notes', e.target.value)} placeholder="Any additional context…" />
+              </div>
+
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save deal'}</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================
+    // DEAL CARD
+    // =====================
+    function DealCard({ deal, companies, contacts, onEdit, onDragStart }) {
+      const company = companies.find(c => c.id === deal.company_id);
+      const showFee = ['Quoted','Pending Likely','Won','Production','Lost'].includes(deal.stage);
+      const cardClass = `deal-card ${deal.stage === 'Won' ? 'won-card' : ''} ${deal.stage === 'Production' ? 'production-card' : ''} ${deal.stage === 'Lost' ? 'lost-card' : ''}`;
+
+      async function toggleInfo(e) {
+        e.stopPropagation();
+        const next = deal.info_status === 'Info Received' ? 'Awaiting Info' : 'Info Received';
+        await db.from('deals').update({ info_status: next }).eq('id', deal.id);
+        onEdit(null, true);
+      }
+
+      return (
+        <div
+          className={cardClass}
+          draggable
+          onDragStart={() => onDragStart(deal.id)}
+          onClick={() => onEdit(deal)}
+        >
+          <div className="card-actions">
+            <button className="card-action-btn" onClick={e => { e.stopPropagation(); onEdit(deal); }} title="Edit">✎</button>
+          </div>
+          <div className="card-num">#{deal.project_number}</div>
+          <div className="card-name">{deal.project_name || 'Untitled'}</div>
+          <div className="card-client">{company?.name || '—'}</div>
+          {showFee && (
+            <div>
+              <div className="card-fee">{fmt(deal.production_fee)}</div>
+              {deal.supplier_fee > 0 && <div className="card-fee-sub">+ {fmt(deal.supplier_fee)} suppliers</div>}
+            </div>
+          )}
+          <div className="card-footer">
+            <div style={{display:'flex',gap:4,alignItems:'center',flexWrap:'wrap'}}>
+              {deal.project_type && <span className={`type-badge ${typeBadgeClass(deal.project_type)}`}>{deal.project_type}</span>}
+              {deal.stage === 'Enquiry' && (
+                <button className={`info-toggle ${deal.info_status === 'Info Received' ? 'info-received' : 'info-awaiting'}`} onClick={toggleInfo}>
+                  {deal.info_status === 'Info Received' ? '✓ Info' : 'Awaiting info'}
+                </button>
+              )}
+            </div>
+            <div>
+              {deal.stage === 'Pending Likely' && isChaseToday(deal.follow_up_date) && (
+                <span className="chase-dot">Chase today</span>
+              )}
+              {deal.stage === 'Production' && deal.delivery_date && (
+                <span style={{fontSize:10,color:'var(--text-3)'}}>Due {new Date(deal.delivery_date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
+              )}
+              {deal.stage === 'Won' && deal.delivery_month && (
+                <span style={{fontSize:10,color:'var(--text-3)'}}>{deal.delivery_month}</span>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================
+    // KANBAN BOARD
+    // =====================
+    function KanbanBoard({ user }) {
+      const [deals, setDeals] = useState([]);
+      const [companies, setCompanies] = useState([]);
+      const [contacts, setContacts] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [editDeal, setEditDeal] = useState(null);
+      const [newStage, setNewStage] = useState(null);
+      const [dragId, setDragId] = useState(null);
+      const [dragOver, setDragOver] = useState(null);
+
+      async function load() {
+        const [d, co, ct] = await Promise.all([
+          db.from('deals').select('*').order('created_at', { ascending: false }),
+          db.from('companies').select('*').order('name'),
+          db.from('contacts').select('*').order('full_name'),
+        ]);
+        setDeals(d.data || []);
+        setCompanies(co.data || []);
+        setContacts(ct.data || []);
+        setLoading(false);
+      }
+
+      useEffect(() => { load(); }, []);
+
+      async function handleDrop(stage) {
+        if (!dragId || !stage) return;
+        await db.from('deals').update({ stage }).eq('id', dragId);
+        setDragId(null);
+        setDragOver(null);
+        load();
+      }
+
+      function colTotal(stage) {
+        return deals.filter(d => d.stage === stage && d.production_fee).reduce((s,d) => s + parseFloat(d.production_fee||0), 0);
+      }
+
+      const STAGE_PIPS = {
+        'Enquiry': 'pip-enquiry',
+        'Quoted': 'pip-quoted',
+        'Pending Likely': 'pip-pending',
+        'Won': 'pip-won',
+        'Production': 'pip-production',
+        'Lost': 'pip-lost',
+      };
+
+      if (loading) return <div className="loading">Loading pipeline…</div>;
+
+      return (
+        <div>
+          {(editDeal !== null || newStage) && (
+            <DealModal
+              deal={editDeal}
+              companies={companies}
+              contacts={contacts}
+              initialStage={newStage}
+              onSave={() => { setEditDeal(null); setNewStage(null); load(); }}
+              onClose={() => { setEditDeal(null); setNewStage(null); }}
+            />
+          )}
+          <div className="kanban-wrap">
+            <div className="kanban-board">
+              {STAGES.map(stage => {
+                const stageDeals = deals.filter(d => d.stage === stage);
+                const total = colTotal(stage);
+                return (
+                  <div key={stage} className="kanban-col">
+                    <div className="col-header">
+                      <div className="col-title-wrap">
+                        <div className={`col-pip ${STAGE_PIPS[stage]}`}></div>
+                        <span className="col-title">{stage}</span>
+                      </div>
+                      <span className="col-count">{stageDeals.length}</span>
+                    </div>
+                    {total > 0 && (
+                      <div className="col-total">{fmt(total)}</div>
+                    )}
+                    <div
+                      className={`col-body ${dragOver === stage ? 'drag-over' : ''}`}
+                      onDragOver={e => { e.preventDefault(); setDragOver(stage); }}
+                      onDragLeave={() => setDragOver(null)}
+                      onDrop={() => handleDrop(stage)}
+                    >
+                      {stageDeals.map(deal => (
+                        <DealCard
+                          key={deal.id}
+                          deal={deal}
+                          companies={companies}
+                          contacts={contacts}
+                          onEdit={(d, refresh) => { if (refresh) { load(); return; } setEditDeal(d); setNewStage(null); }}
+                          onDragStart={id => setDragId(id)}
+                        />
+                      ))}
+                      {stageDeals.length === 0 && <div className="empty">No deals</div>}
+                      <button className="add-card-btn" onClick={() => { setNewStage(stage); setEditDeal(null); }}>+ Add deal</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================
+    // CONTACTS PAGE
+    // =====================
+    function ContactsPage() {
+      const [contacts, setContacts] = useState([]);
+      const [companies, setCompanies] = useState([]);
+      const [search, setSearch] = useState('');
+      const [loading, setLoading] = useState(true);
+      const [showModal, setShowModal] = useState(false);
+      const [editContact, setEditContact] = useState(null);
+
+      async function load() {
+        const [ct, co] = await Promise.all([
+          db.from('contacts').select('*, companies(name)').order('full_name'),
+          db.from('companies').select('*').order('name'),
+        ]);
+        setContacts(ct.data || []);
+        setCompanies(co.data || []);
+        setLoading(false);
+      }
+
+      useEffect(() => { load(); }, []);
+
+      const filtered = contacts.filter(c =>
+        c.full_name?.toLowerCase().includes(search.toLowerCase()) ||
+        c.companies?.name?.toLowerCase().includes(search.toLowerCase()) ||
+        c.job_title?.toLowerCase().includes(search.toLowerCase())
+      );
+
+      return (
+        <div className="page-wrap">
+          {showModal && (
+            <ContactModal
+              contact={editContact}
+              companies={companies}
+              onSave={() => { setShowModal(false); setEditContact(null); load(); }}
+              onClose={() => { setShowModal(false); setEditContact(null); }}
+            />
+          )}
+          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 20}}>
+            <div className="search-bar">
+              <span className="search-icon">⌕</span>
+              <input placeholder="Search contacts…" value={search} onChange={e => setSearch(e.target.value)} />
+            </div>
+            <button className="btn btn-primary" onClick={() => { setEditContact(null); setShowModal(true); }}>+ Add contact</button>
+          </div>
+          {loading ? <div className="loading">Loading contacts…</div> : (
+            <div className="contacts-grid">
+              {filtered.map(c => (
+                <div key={c.id} className="contact-card" onClick={() => { setEditContact(c); setShowModal(true); }}>
+                  <div className="contact-header">
+                    <div className="contact-avatar">{initials(c.full_name)}</div>
+                    <div>
+                      <div className="contact-name">{c.full_name}</div>
+                      <div className="contact-role">{c.job_title || '—'}</div>
+                    </div>
+                  </div>
+                  {c.companies?.name && <div className="contact-company">{c.companies.name}</div>}
+                  {c.email && <div style={{fontSize:12,color:'var(--blue)',marginBottom:4}}>{c.email}</div>}
+                  <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:8}}>
+                    {c.source && <span className="source-badge">{c.source}</span>}
+                    {c.contact_type && <span className="tag">{c.contact_type}</span>}
+                  </div>
+                  {c.tags && c.tags.length > 0 && (
+                    <div className="tag-list">{c.tags.map(t => <span key={t} className="tag">{t}</span>)}</div>
+                  )}
+                </div>
+              ))}
+              {filtered.length === 0 && <div className="empty" style={{gridColumn:'1/-1'}}>No contacts found</div>}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // =====================
+    // CONTACT MODAL
+    // =====================
+    function ContactModal({ contact, companies, onSave, onClose }) {
+      const isNew = !contact?.id;
+      const [form, setForm] = useState(contact || { full_name:'', job_title:'', company_id:'', email:'', contact_type:'Prospect', source:'', tags:[], notes:'' });
+      const [saving, setSaving] = useState(false);
+      function set(k,v) { setForm(f => ({...f,[k]:v})); }
+
+      async function handleSave() {
+        setSaving(true);
+        const payload = {...form};
+        Object.keys(payload).forEach(k => { if (payload[k] === '') payload[k] = null; });
+        if (isNew) {
+          await db.from('contacts').insert(payload);
+        } else {
+          await db.from('contacts').update(payload).eq('id', form.id);
+        }
+        setSaving(false);
+        onSave();
+      }
+
+      return (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+          <div className="modal">
+            <div className="modal-header">
+              <h3>{isNew ? 'New contact' : `Edit — ${form.full_name}`}</h3>
+              <button className="modal-close" onClick={onClose}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Full name</label>
+                  <input className="form-input" value={form.full_name||''} onChange={e => set('full_name',e.target.value)} placeholder="Jane Smith" />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Job title</label>
+                  <input className="form-input" value={form.job_title||''} onChange={e => set('job_title',e.target.value)} placeholder="Development Director" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Company</label>
+                  <select className="form-select" value={form.company_id||''} onChange={e => set('company_id',e.target.value)}>
+                    <option value="">Select company…</option>
+                    {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Email</label>
+                  <input className="form-input" type="email" value={form.email||''} onChange={e => set('email',e.target.value)} placeholder="jane@company.com" />
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Contact type</label>
+                  <select className="form-select" value={form.contact_type||''} onChange={e => set('contact_type',e.target.value)}>
+                    <option value="">Select…</option>
+                    {CONTACT_TYPES.map(t => <option key={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Source</label>
+                  <select className="form-select" value={form.source||''} onChange={e => set('source',e.target.value)}>
+                    <option value="">Select…</option>
+                    {SOURCES.map(s => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Tags</label>
+                <TagsInput value={form.tags||[]} onChange={v => set('tags',v)} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Notes</label>
+                <textarea className="form-textarea" value={form.notes||''} onChange={e => set('notes',e.target.value)} placeholder="Any context about this contact…" />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save contact'}</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================
+    // COMPANIES PAGE
+    // =====================
+    function CompaniesPage() {
+      const [companies, setCompanies] = useState([]);
+      const [search, setSearch] = useState('');
+      const [loading, setLoading] = useState(true);
+      const [showModal, setShowModal] = useState(false);
+      const [editCo, setEditCo] = useState(null);
+
+      async function load() {
+        const { data } = await db.from('companies').select('*').order('name');
+        setCompanies(data || []);
+        setLoading(false);
+      }
+
+      useEffect(() => { load(); }, []);
+
+      const filtered = companies.filter(c =>
+        c.name?.toLowerCase().includes(search.toLowerCase())
+      );
+
+      return (
+        <div className="page-wrap">
+          {showModal && (
+            <CompanyModal
+              company={editCo}
+              onSave={() => { setShowModal(false); setEditCo(null); load(); }}
+              onClose={() => { setShowModal(false); setEditCo(null); }}
+            />
+          )}
+          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 20}}>
+            <div className="search-bar">
+              <span className="search-icon">⌕</span>
+              <input placeholder="Search companies…" value={search} onChange={e => setSearch(e.target.value)} />
+            </div>
+            <button className="btn btn-primary" onClick={() => { setEditCo(null); setShowModal(true); }}>+ Add company</button>
+          </div>
+          {loading ? <div className="loading">Loading…</div> : (
+            <div className="contacts-grid">
+              {filtered.map(c => (
+                <div key={c.id} className="contact-card" onClick={() => { setEditCo(c); setShowModal(true); }}>
+                  <div className="contact-header">
+                    <div className="contact-avatar" style={{background:'var(--amber-light)',color:'var(--amber)'}}>{initials(c.name)}</div>
+                    <div>
+                      <div className="contact-name">{c.name}</div>
+                      <div className="contact-role">{c.type || '—'}</div>
+                    </div>
+                  </div>
+                  <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:8}}>
+                    {c.region && <span className="tag">{c.region}</span>}
+                    {c.status && <span className={`tag ${c.status === 'Active Client' ? 'source-badge' : ''}`}>{c.status}</span>}
+                  </div>
+                  {c.website && <div style={{fontSize:11,color:'var(--blue)',marginTop:6}}>{c.website}</div>}
+                </div>
+              ))}
+              {filtered.length === 0 && <div className="empty" style={{gridColumn:'1/-1'}}>No companies found</div>}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // =====================
+    // COMPANY MODAL
+    // =====================
+    function CompanyModal({ company, onSave, onClose }) {
+      const isNew = !company?.id;
+      const [form, setForm] = useState(company || { name:'', type:'', website:'', region:'', status:'Prospect', notes:'' });
+      const [saving, setSaving] = useState(false);
+      function set(k,v) { setForm(f => ({...f,[k]:v})); }
+
+      async function handleSave() {
+        setSaving(true);
+        const payload = {...form};
+        Object.keys(payload).forEach(k => { if (payload[k] === '') payload[k] = null; });
+        if (isNew) {
+          await db.from('companies').insert(payload);
+        } else {
+          await db.from('companies').update(payload).eq('id', form.id);
+        }
+        setSaving(false);
+        onSave();
+      }
+
+      return (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+          <div className="modal">
+            <div className="modal-header">
+              <h3>{isNew ? 'New company' : `Edit — ${form.name}`}</h3>
+              <button className="modal-close" onClick={onClose}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Company name</label>
+                <input className="form-input" value={form.name||''} onChange={e => set('name',e.target.value)} placeholder="Renaker" />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Type</label>
+                  <select className="form-select" value={form.type||''} onChange={e => set('type',e.target.value)}>
+                    <option value="">Select…</option>
+                    {COMPANY_TYPES.map(t => <option key={t}>{t}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Region</label>
+                  <select className="form-select" value={form.region||''} onChange={e => set('region',e.target.value)}>
+                    <option value="">Select…</option>
+                    {REGIONS.map(r => <option key={r}>{r}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Status</label>
+                  <select className="form-select" value={form.status||'Prospect'} onChange={e => set('status',e.target.value)}>
+                    {['Active Client','Prospect','Dormant','Avoid'].map(s => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Website</label>
+                  <input className="form-input" value={form.website||''} onChange={e => set('website',e.target.value)} placeholder="https://…" />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Notes</label>
+                <textarea className="form-textarea" value={form.notes||''} onChange={e => set('notes',e.target.value)} placeholder="Procurement style, relationship notes…" />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save company'}</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================
+    // APP SHELL
+    // =====================
+    function App() {
+      const [session, setSession] = useState(null);
+      const [page, setPage] = useState('pipeline');
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        db.auth.getSession().then(({ data }) => {
+          setSession(data.session);
+          setLoading(false);
+        });
+        const { data: { subscription } } = db.auth.onAuthStateChange((_e, s) => setSession(s));
+        return () => subscription.unsubscribe();
+      }, []);
+
+      if (loading) return <div className="loading">Loading…</div>;
+      if (!session) return <AuthScreen onAuth={setSession} />;
+
+      const userEmail = session.user.email;
+      const userName = userEmail.split('@')[0];
+
+      const NAV = [
+        { id: 'pipeline', label: 'Pipeline', icon: '⬛' },
+        { id: 'contacts', label: 'Contacts', icon: '◎' },
+        { id: 'companies', label: 'Companies', icon: '⬡' },
+      ];
+
+      const PAGE_TITLES = { pipeline: 'Pipeline', contacts: 'Contacts', companies: 'Companies' };
+
+      return (
+        <div className="app">
+          <nav className="sidebar">
+            <div className="sidebar-logo">
+              <h1>Our Studio</h1>
+              <span>CRM</span>
+            </div>
+            <div className="sidebar-nav">
+              {NAV.map(n => (
+                <button key={n.id} className={`nav-item ${page === n.id ? 'active' : ''}`} onClick={() => setPage(n.id)}>
+                  <span className="nav-icon">{n.icon}</span>
+                  {n.label}
+                </button>
+              ))}
+            </div>
+            <div className="sidebar-footer">
+              <div>{userName}</div>
+              <button style={{marginTop:6,fontSize:11,color:'var(--text-3)',background:'none',border:'none',cursor:'pointer',padding:0,fontFamily:'inherit'}} onClick={() => db.auth.signOut()}>Sign out</button>
+            </div>
+          </nav>
+          <main className="main">
+            <div className="topbar">
+              <span className="topbar-title">{PAGE_TITLES[page]}</span>
+              <div className="topbar-right">
+                <span className="user-pill">{userEmail}</span>
+              </div>
+            </div>
+            {page === 'pipeline' && <KanbanBoard user={session.user} />}
+            {page === 'contacts' && <ContactsPage />}
+            {page === 'companies' && <CompaniesPage />}
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
