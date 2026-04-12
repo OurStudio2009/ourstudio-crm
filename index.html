@@ -1339,22 +1339,129 @@
     // =====================
     function CompaniesPage() {
       const [companies, setCompanies] = useState([]);
+      const [contacts, setContacts] = useState([]);
       const [search, setSearch] = useState('');
       const [loading, setLoading] = useState(true);
       const [showModal, setShowModal] = useState(false);
       const [editCo, setEditCo] = useState(null);
+      const [viewMode, setViewMode] = useState('grid');
+      const [expandedId, setExpandedId] = useState(null);
+      const [filterStatus, setFilterStatus] = useState('all');
 
       async function load() {
-        const { data } = await db.from('companies').select('*').order('name');
-        setCompanies(data || []);
+        const [co, ct] = await Promise.all([
+          db.from('companies').select('*').order('name'),
+          db.from('contacts').select('id, full_name, job_title, company_id, email').order('full_name'),
+        ]);
+        setCompanies(co.data || []);
+        setContacts(ct.data || []);
         setLoading(false);
       }
 
       useEffect(() => { load(); }, []);
 
-      const filtered = companies.filter(c =>
-        c.name?.toLowerCase().includes(search.toLowerCase())
-      );
+      function contactsForCompany(companyId) {
+        return contacts.filter(c => c.company_id === companyId);
+      }
+
+      const filtered = companies.filter(c => {
+        const matchSearch = c.name?.toLowerCase().includes(search.toLowerCase());
+        const matchStatus = filterStatus === 'all' || c.status === filterStatus;
+        return matchSearch && matchStatus;
+      });
+
+      function statusStyle(status) {
+        if (status === 'Active Client') return { border:'1.5px solid var(--green)', background:'var(--green-light)' };
+        if (status === 'Avoid') return { border:'1.5px solid var(--red)', background:'var(--red-light)', opacity: 0.7 };
+        return {};
+      }
+
+      function chaseStyle(chase) {
+        if (chase) return { border:'1.5px solid var(--amber)', background:'var(--amber-light)' };
+        return {};
+      }
+
+      function CompanyCard({ c }) {
+        const expanded = expandedId === c.id;
+        const coContacts = contactsForCompany(c.id);
+        const cardStyle = { ...statusStyle(c.status), ...(c.needs_chase && !c.status === 'Active Client' ? chaseStyle(true) : {}) };
+        if (c.needs_chase) Object.assign(cardStyle, chaseStyle(true));
+        if (c.status === 'Active Client') Object.assign(cardStyle, statusStyle('Active Client'));
+
+        return (
+          <div className="contact-card" style={cardStyle}>
+            <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between'}}>
+              <div className="contact-header" style={{marginBottom:6,flex:1,cursor:'pointer'}} onClick={() => { setEditCo(c); setShowModal(true); }}>
+                <div className="contact-avatar" style={{background:'var(--amber-light)',color:'var(--amber)',flexShrink:0}}>{initials(c.name)}</div>
+                <div>
+                  <div className="contact-name" style={{display:'flex',alignItems:'center',gap:6}}>
+                    {c.name}
+                    {c.status === 'Active Client' && <span style={{fontSize:9,padding:'1px 5px',borderRadius:3,background:'var(--green)',color:'white',fontWeight:500}}>Active</span>}
+                    {c.needs_chase && <span style={{fontSize:9,padding:'1px 5px',borderRadius:3,background:'var(--amber)',color:'white',fontWeight:500}}>Chase</span>}
+                  </div>
+                  <div className="contact-role">{c.type || '—'}</div>
+                </div>
+              </div>
+              {coContacts.length > 0 && (
+                <button
+                  onClick={e => { e.stopPropagation(); setExpandedId(expanded ? null : c.id); }}
+                  style={{fontSize:11,color:'var(--text-2)',background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:4,padding:'3px 8px',cursor:'pointer',flexShrink:0,marginTop:2,fontFamily:'inherit'}}
+                >
+                  {coContacts.length} {coContacts.length === 1 ? 'contact' : 'contacts'} {expanded ? '▲' : '▼'}
+                </button>
+              )}
+            </div>
+            <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:6}}>
+              {c.region && <span className="tag">{c.region}</span>}
+              {c.status && c.status !== 'Active Client' && <span className="tag">{c.status}</span>}
+            </div>
+            {c.website && <div style={{fontSize:11,color:'var(--blue)',marginBottom:6}}>{c.website}</div>}
+            {expanded && coContacts.length > 0 && (
+              <div style={{borderTop:'1px solid var(--border)',paddingTop:8,marginTop:4}}>
+                {coContacts.map(ct => (
+                  <div key={ct.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid var(--border)'}}>
+                    <div>
+                      <div style={{fontSize:12,fontWeight:500,color:'var(--text)'}}>{ct.full_name}</div>
+                      <div style={{fontSize:11,color:'var(--text-2)'}}>{ct.job_title}</div>
+                    </div>
+                    {ct.email && <div style={{fontSize:11,color:'var(--blue)'}}>{ct.email}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      function CompanyRow({ c }) {
+        const coContacts = contactsForCompany(c.id);
+        const rowStyle = {};
+        if (c.status === 'Active Client') Object.assign(rowStyle, { borderLeft:'3px solid var(--green)', paddingLeft:10 });
+        if (c.needs_chase) Object.assign(rowStyle, { borderLeft:'3px solid var(--amber)', paddingLeft:10 });
+
+        return (
+          <div style={{display:'grid', gridTemplateColumns:'2fr 1fr 1fr 2fr auto', gap:12, alignItems:'center', padding:'10px 14px', background:'var(--surface)', borderRadius:'var(--radius-sm)', border:'1px solid var(--border)', marginBottom:6, ...rowStyle}}>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <div className="contact-avatar" style={{width:28,height:28,fontSize:11,background:'var(--amber-light)',color:'var(--amber)',flexShrink:0}}>{initials(c.name)}</div>
+              <div>
+                <div style={{fontSize:13,fontWeight:500,display:'flex',alignItems:'center',gap:5}}>
+                  {c.name}
+                  {c.status === 'Active Client' && <span style={{fontSize:9,padding:'1px 5px',borderRadius:3,background:'var(--green)',color:'white',fontWeight:500}}>Active</span>}
+                  {c.needs_chase && <span style={{fontSize:9,padding:'1px 5px',borderRadius:3,background:'var(--amber)',color:'white',fontWeight:500}}>Chase</span>}
+                </div>
+                <div style={{fontSize:11,color:'var(--text-2)'}}>{c.type}</div>
+              </div>
+            </div>
+            <div style={{fontSize:12,color:'var(--text-2)'}}>{c.region || '—'}</div>
+            <div style={{fontSize:12,color:'var(--text-2)'}}>{coContacts.length} contact{coContacts.length !== 1 ? 's' : ''}</div>
+            <div style={{fontSize:11,color:'var(--text-2)'}}>
+              {coContacts.slice(0,3).map(ct => ct.full_name).join(', ')}
+              {coContacts.length > 3 && ` +${coContacts.length - 3} more`}
+            </div>
+            <button className="btn btn-ghost btn-sm" onClick={() => { setEditCo(c); setShowModal(true); }}>Edit</button>
+          </div>
+        );
+      }
 
       return (
         <div className="page-wrap">
@@ -1365,32 +1472,56 @@
               onClose={() => { setShowModal(false); setEditCo(null); }}
             />
           )}
-          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: 20}}>
-            <div className="search-bar">
-              <span className="search-icon">⌕</span>
-              <input placeholder="Search companies…" value={search} onChange={e => setSearch(e.target.value)} />
+          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16, flexWrap:'wrap', gap:10}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
+              <div className="search-bar">
+                <span className="search-icon">⌕</span>
+                <input placeholder="Search companies…" value={search} onChange={e => setSearch(e.target.value)} />
+              </div>
+              <select className="form-select" style={{width:'auto',fontSize:12,padding:'7px 10px'}} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
+                <option value="all">All statuses</option>
+                <option value="Active Client">Active clients</option>
+                <option value="Prospect">Prospects</option>
+                <option value="Dormant">Dormant</option>
+              </select>
             </div>
-            <button className="btn btn-primary" onClick={() => { setEditCo(null); setShowModal(true); }}>+ Add company</button>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <div style={{display:'flex',border:'1px solid var(--border-med)',borderRadius:'var(--radius-sm)',overflow:'hidden'}}>
+                <button onClick={() => setViewMode('grid')} style={{padding:'6px 12px',fontSize:12,border:'none',cursor:'pointer',fontFamily:'inherit',background: viewMode==='grid' ? 'var(--text)' : 'transparent',color: viewMode==='grid' ? 'white' : 'var(--text-2)'}}>Grid</button>
+                <button onClick={() => setViewMode('list')} style={{padding:'6px 12px',fontSize:12,border:'none',cursor:'pointer',fontFamily:'inherit',background: viewMode==='list' ? 'var(--text)' : 'transparent',color: viewMode==='list' ? 'white' : 'var(--text-2)'}}>List</button>
+              </div>
+              <button className="btn btn-primary" onClick={() => { setEditCo(null); setShowModal(true); }}>+ Add company</button>
+            </div>
           </div>
-          {loading ? <div className="loading">Loading…</div> : (
+
+          {/* Legend */}
+          <div style={{display:'flex',gap:12,marginBottom:16,flexWrap:'wrap'}}>
+            <div style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'var(--text-2)'}}>
+              <div style={{width:10,height:10,borderRadius:2,background:'var(--green)'}}></div> Active client
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'var(--text-2)'}}>
+              <div style={{width:10,height:10,borderRadius:2,background:'var(--amber)'}}></div> Needs chasing
+            </div>
+          </div>
+
+          {loading ? <div className="loading">Loading…</div> : viewMode === 'grid' ? (
             <div className="contacts-grid">
-              {filtered.map(c => (
-                <div key={c.id} className="contact-card" onClick={() => { setEditCo(c); setShowModal(true); }}>
-                  <div className="contact-header">
-                    <div className="contact-avatar" style={{background:'var(--amber-light)',color:'var(--amber)'}}>{initials(c.name)}</div>
-                    <div>
-                      <div className="contact-name">{c.name}</div>
-                      <div className="contact-role">{c.type || '—'}</div>
-                    </div>
-                  </div>
-                  <div style={{display:'flex',gap:6,flexWrap:'wrap',marginTop:8}}>
-                    {c.region && <span className="tag">{c.region}</span>}
-                    {c.status && <span className={`tag ${c.status === 'Active Client' ? 'source-badge' : ''}`}>{c.status}</span>}
-                  </div>
-                  {c.website && <div style={{fontSize:11,color:'var(--blue)',marginTop:6}}>{c.website}</div>}
-                </div>
-              ))}
+              {filtered.map(c => <CompanyCard key={c.id} c={c} />)}
               {filtered.length === 0 && <div className="empty" style={{gridColumn:'1/-1'}}>No companies found</div>}
+            </div>
+          ) : (
+            <div>
+              {viewMode === 'list' && (
+                <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr 2fr auto',gap:12,padding:'6px 14px',marginBottom:4}}>
+                  <div style={{fontSize:11,fontWeight:600,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.04em'}}>Company</div>
+                  <div style={{fontSize:11,fontWeight:600,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.04em'}}>Region</div>
+                  <div style={{fontSize:11,fontWeight:600,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.04em'}}>Contacts</div>
+                  <div style={{fontSize:11,fontWeight:600,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.04em'}}>People</div>
+                  <div></div>
+                </div>
+              )}
+              {filtered.map(c => <CompanyRow key={c.id} c={c} />)}
+              {filtered.length === 0 && <div className="empty">No companies found</div>}
             </div>
           )}
         </div>
@@ -1402,7 +1533,7 @@
     // =====================
     function CompanyModal({ company, onSave, onClose }) {
       const isNew = !company?.id;
-      const [form, setForm] = useState(company || { name:'', type:'', website:'', region:'', status:'Prospect', notes:'' });
+      const [form, setForm] = useState(company || { name:'', type:'', website:'', region:'', status:'Prospect', needs_chase: false, notes:'' });
       const [saving, setSaving] = useState(false);
       function set(k,v) { setForm(f => ({...f,[k]:v})); }
 
@@ -1458,6 +1589,12 @@
                   <label className="form-label">Website</label>
                   <input className="form-input" value={form.website||''} onChange={e => set('website',e.target.value)} placeholder="https://…" />
                 </div>
+              </div>
+              <div className="form-group">
+                <label className="checkbox-item" style={{cursor:'pointer'}}>
+                  <input type="checkbox" checked={form.needs_chase||false} onChange={e => set('needs_chase', e.target.checked)} style={{accentColor:'var(--amber)'}} />
+                  <span style={{fontSize:13}}>Flag for chasing <span style={{fontSize:11,color:'var(--text-2)'}}>— highlights in amber</span></span>
+                </label>
               </div>
               <div className="form-group">
                 <label className="form-label">Notes</label>
