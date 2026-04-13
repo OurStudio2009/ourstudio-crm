@@ -756,8 +756,10 @@
       const isNew = !deal?.id;
       const [form, setForm] = useState(deal || {
         stage: initialStage || 'Enquiry',
+        project_number: '',
         info_status: 'Awaiting Info',
         project_type: '',
+        project_types: [],
         scope: '',
         project_name: '',
         company_id: '',
@@ -837,6 +839,18 @@
               {/* Core */}
               <div className="form-section">
                 <div className="form-section-title">Project</div>
+                <div className="form-row">
+                  <div className="form-group">
+                    <label className="form-label">Project number</label>
+                    <input className="form-input" value={form.project_number || ''} onChange={e => set('project_number', e.target.value)} placeholder="e.g. 11743" style={{fontFamily:'DM Mono, monospace'}} />
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Owner</label>
+                    <select className="form-select" value={form.owner || 'Sam'} onChange={e => set('owner', e.target.value)}>
+                      {OWNERS.map(o => <option key={o}>{o}</option>)}
+                    </select>
+                  </div>
+                </div>
                 <div className="form-group">
                   <label className="form-label">Project name</label>
                   <input className="form-input" value={form.project_name || ''} onChange={e => set('project_name', e.target.value)} placeholder="e.g. Salford Quays resi tower" />
@@ -857,19 +871,20 @@
                     </select>
                   </div>
                 </div>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Project type</label>
-                    <select className="form-select" value={form.project_type || ''} onChange={e => set('project_type', e.target.value)}>
-                      <option value="">Select type…</option>
-                      {PROJECT_TYPES.map(t => <option key={t}>{t}</option>)}
-                    </select>
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">Owner</label>
-                    <select className="form-select" value={form.owner || 'Sam'} onChange={e => set('owner', e.target.value)}>
-                      {OWNERS.map(o => <option key={o}>{o}</option>)}
-                    </select>
+                <div className="form-group">
+                  <label className="form-label">Project type <span style={{fontWeight:400,color:'var(--text-3)'}}>— select all that apply</span></label>
+                  <div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:4}}>
+                    {PROJECT_TYPES.map(t => {
+                      const selected = (form.project_types || []).includes(t);
+                      return (
+                        <button key={t} type="button" onClick={() => {
+                          const cur = form.project_types || [];
+                          set('project_types', selected ? cur.filter(x => x !== t) : [...cur, t]);
+                        }} style={{fontSize:12,padding:'4px 10px',borderRadius:4,border:`1px solid ${selected ? 'var(--text)' : 'var(--border-med)'}`,background: selected ? 'var(--text)' : 'transparent',color: selected ? 'white' : 'var(--text-2)',cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s'}}>
+                          {t}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 <div className="form-group">
@@ -1042,7 +1057,9 @@
           )}
           <div className="card-footer">
             <div style={{display:'flex',gap:4,alignItems:'center',flexWrap:'wrap'}}>
-              {deal.project_type && <span className={`type-badge ${typeBadgeClass(deal.project_type)}`}>{deal.project_type}</span>}
+              {(deal.project_types && deal.project_types.length > 0 ? deal.project_types : deal.project_type ? [deal.project_type] : []).map(t => (
+                <span key={t} className={`type-badge ${typeBadgeClass(t)}`}>{t}</span>
+              ))}
               {deal.stage === 'Enquiry' && (
                 <button className={`info-toggle ${deal.info_status === 'Info Received' ? 'info-received' : 'info-awaiting'}`} onClick={toggleInfo}>
                   {deal.info_status === 'Info Received' ? '✓ Info' : 'Awaiting info'}
@@ -1202,6 +1219,24 @@
         c.job_title?.toLowerCase().includes(search.toLowerCase())
       );
 
+      function exportCSV() {
+        const rows = [['First Name','Last Name','Email','Company','Job Title','Contact Type','Source']];
+        filtered.forEach(c => {
+          const parts = (c.full_name || '').trim().split(' ');
+          const first = parts[0] || '';
+          const last = parts.slice(1).join(' ') || '';
+          rows.push([first, last, c.email || '', c.companies?.name || '', c.job_title || '', c.contact_type || '', c.source || '']);
+        });
+        const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ourstudio-contacts-${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
       function ViewToggle() {
         return (
           <div style={{display:'flex',border:'1px solid var(--border-med)',borderRadius:'var(--radius-sm)',overflow:'hidden'}}>
@@ -1228,6 +1263,7 @@
             </div>
             <div style={{display:'flex',alignItems:'center',gap:8}}>
               <ViewToggle />
+              <button className="btn btn-ghost" onClick={exportCSV}>↓ Export CSV</button>
               <button className="btn btn-primary" onClick={() => { setEditContact(null); setShowModal(true); }}>+ Add contact</button>
             </div>
           </div>
