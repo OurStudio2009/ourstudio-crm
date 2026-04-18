@@ -638,8 +638,10 @@
     const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     const STAGES = ['Enquiry','Quoted','Pending Likely','Won','Production','Lost'];
-    const PROJECT_TYPES = ['AVR','CGI','Animation','Masterplan','Consultation Tool','Other'];
+    const PROJECT_TYPES = ['AVR','CGI','Animation','Masterplan','Consultation Tool','Interactive App','Other'];
     const LOST_REASONS = ['Preferred Supplier','Cost','Project Cancelled','Timing / On Hold'];
+    const WON_STATUS = ['Confirmation form sent','Confirmation form signed & PO received','Information received'];
+    const PRODUCTION_STATUS = ['Delivered','Invoiced'];
     const OWNERS = ['Sam','Nick','Maisie'];
     const CONTACT_TYPES = ['Client','Prospect','Consultant','Referrer','Supplier'];
     const SOURCES = ['MIPIM','Referral','LinkedIn','Inbound','Event','Other'];
@@ -778,6 +780,8 @@
         start_date: '',
         delivery_date: '',
         lost_reason: [],
+        won_status: [],
+        production_status: [],
         owner: 'Sam',
         notes: '',
       });
@@ -973,6 +977,26 @@
                 </div>
               )}
 
+              {/* Won status */}
+              {stage === 'Won' && (
+                <div className="form-section">
+                  <div className="form-section-title">Confirmation status <span style={{fontWeight:400,color:'var(--text-3)'}}>— select all that apply</span></div>
+                  <div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:4}}>
+                    {WON_STATUS.map(s => {
+                      const selected = (form.won_status || []).includes(s);
+                      return (
+                        <button key={s} type="button" onClick={() => {
+                          const cur = form.won_status || [];
+                          set('won_status', selected ? cur.filter(x => x !== s) : [...cur, s]);
+                        }} style={{fontSize:12,padding:'4px 10px',borderRadius:4,border:'1px solid ' + (selected ? 'var(--green)' : 'var(--border-med)'),background: selected ? 'var(--green-light)' : 'transparent',color: selected ? 'var(--green)' : 'var(--text-2)',cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s'}}>
+                          {selected ? '✓ ' : ''}{s}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Production */}
               {showProduction && (
                 <div className="form-section">
@@ -985,6 +1009,22 @@
                     <div className="form-group">
                       <label className="form-label">Delivery date</label>
                       <input className="form-input" type="date" value={form.delivery_date || ''} onChange={e => set('delivery_date', e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="form-group" style={{marginTop:12}}>
+                    <div className="form-section-title" style={{marginBottom:8}}>Completion status <span style={{fontWeight:400,color:'var(--text-3)'}}>— select all that apply</span></div>
+                    <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+                      {PRODUCTION_STATUS.map(s => {
+                        const selected = (form.production_status || []).includes(s);
+                        return (
+                          <button key={s} type="button" onClick={() => {
+                            const cur = form.production_status || [];
+                            set('production_status', selected ? cur.filter(x => x !== s) : [...cur, s]);
+                          }} style={{fontSize:12,padding:'4px 10px',borderRadius:4,border:'1px solid ' + (selected ? 'var(--teal)' : 'var(--border-med)'),background: selected ? 'var(--teal-light)' : 'transparent',color: selected ? 'var(--teal)' : 'var(--text-2)',cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s'}}>
+                            {selected ? '✓ ' : ''}{s}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
@@ -1066,16 +1106,26 @@
                 </button>
               )}
             </div>
-            <div>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:3}}>
               {deal.stage === 'Pending Likely' && isChaseToday(deal.follow_up_date) && (
                 <span className="chase-dot">Chase today</span>
-              )}
-              {deal.stage === 'Production' && deal.delivery_date && (
-                <span style={{fontSize:10,color:'var(--text-3)'}}>Due {new Date(deal.delivery_date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
               )}
               {deal.stage === 'Won' && deal.delivery_month && (
                 <span style={{fontSize:10,color:'var(--text-3)'}}>{deal.delivery_month}</span>
               )}
+              {deal.stage === 'Won' && (deal.won_status || []).map(s => (
+                <span key={s} style={{fontSize:9,padding:'1px 5px',borderRadius:3,background:'var(--green-light)',color:'var(--green)',fontWeight:500,whiteSpace:'nowrap'}}>
+                  {s === 'Confirmation form sent' ? 'Form sent' : s === 'Confirmation form signed & PO received' ? 'Form signed & PO' : 'Info received'}
+                </span>
+              ))}
+              {deal.stage === 'Production' && deal.delivery_date && (
+                <span style={{fontSize:10,color:'var(--text-3)'}}>Due {new Date(deal.delivery_date).toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</span>
+              )}
+              {deal.stage === 'Production' && (deal.production_status || []).map(s => (
+                <span key={s} style={{fontSize:9,padding:'1px 5px',borderRadius:3,background:'var(--teal-light)',color:'var(--teal)',fontWeight:500}}>
+                  {s === 'Delivered' ? '✓ Delivered' : '✓ Invoiced'}
+                </span>
+              ))}
             </div>
           </div>
         </div>
@@ -1682,11 +1732,231 @@
     }
 
     // =====================
+    // DASHBOARD
+    // =====================
+    function DashboardPage() {
+      const [deals, setDeals] = useState([]);
+      const [targets, setTargets] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [view, setView] = useState('monthly');
+
+      useEffect(() => {
+        async function load() {
+          const [d, t] = await Promise.all([
+            db.from('deals').select('*'),
+            db.from('targets').select('*').order('month_label'),
+          ]);
+          setDeals(d.data || []);
+          setTargets(t.data || []);
+          setLoading(false);
+        }
+        load();
+      }, []);
+
+      const MONTH_ORDER = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+      function monthIndex(label) {
+        if (!label) return -1;
+        const parts = label.split(' ');
+        return MONTH_ORDER.indexOf(parts[0]) + (parseInt(parts[1] || '0') * 12);
+      }
+
+      function revenueByMonth() {
+        const map = {};
+        deals.forEach(d => {
+          if (!['Won','Production','Lost'].includes(d.stage)) return;
+          const fee = parseFloat(d.production_fee || 0);
+          if (!fee) return;
+          const alloc = [
+            { label: d.fee_month_1_label, amount: parseFloat(d.fee_month_1_amount || 0) },
+            { label: d.fee_month_2_label, amount: parseFloat(d.fee_month_2_amount || 0) },
+            { label: d.fee_month_3_label, amount: parseFloat(d.fee_month_3_amount || 0) },
+          ].filter(a => a.label && a.amount > 0);
+          if (alloc.length > 0) {
+            alloc.forEach(a => { map[a.label] = (map[a.label] || 0) + a.amount; });
+          } else {
+            const month = d.delivery_month || d.start_month;
+            if (month) map[month] = (map[month] || 0) + fee;
+          }
+        });
+        return map;
+      }
+
+      function pipelineByMonth() {
+        const map = {};
+        deals.forEach(d => {
+          if (!['Quoted','Pending Likely'].includes(d.stage)) return;
+          const fee = parseFloat(d.production_fee || 0);
+          const month = d.delivery_month || d.start_month;
+          if (fee && month) map[month] = (map[month] || 0) + fee;
+        });
+        return map;
+      }
+
+      const revMap = revenueByMonth();
+      const pipMap = pipelineByMonth();
+
+      const monthlyData = targets.map(t => ({
+        label: t.month_label,
+        short: t.month_label.split(' ')[0].slice(0,3) + "'" + t.month_label.split(' ')[1].slice(2),
+        target: parseFloat(t.target_amount || 50000),
+        revenue: Math.round(revMap[t.month_label] || 0),
+        pipeline: Math.round(pipMap[t.month_label] || 0),
+      })).sort((a,b) => monthIndex(a.label) - monthIndex(b.label));
+
+      const quarters = ['Q1','Q2','Q3','Q4'];
+      const quarterMonths = { Q1: [0,1,2], Q2: [3,4,5], Q3: [6,7,8], Q4: [9,10,11] };
+      const year = new Date().getFullYear();
+      const quarterlyData = quarters.map(q => {
+        const idxs = quarterMonths[q];
+        const months = idxs.map(i => MONTH_ORDER[i] + ' ' + year);
+        return {
+          label: q,
+          target: 150000,
+          revenue: Math.round(months.reduce((s,m) => s + (revMap[m]||0), 0)),
+          pipeline: Math.round(months.reduce((s,m) => s + (pipMap[m]||0), 0)),
+        };
+      });
+
+      const chartData = view === 'monthly' ? monthlyData : quarterlyData;
+      const maxVal = Math.max(...chartData.map(d => Math.max(d.target, d.revenue + d.pipeline, 10000)));
+
+      const wonDeals = deals.filter(d => ['Won','Production'].includes(d.stage));
+      const totalWon = wonDeals.reduce((s,d) => s + parseFloat(d.production_fee||0), 0);
+      const quotedDeals = deals.filter(d => ['Quoted','Pending Likely'].includes(d.stage));
+      const totalPipeline = quotedDeals.reduce((s,d) => s + parseFloat(d.production_fee||0), 0);
+      const lostDeals = deals.filter(d => d.stage === 'Lost');
+
+      const now = new Date();
+      const thisMonth = MONTH_ORDER[now.getMonth()] + ' ' + now.getFullYear();
+      const thisMonthTarget = parseFloat(targets.find(t => t.month_label === thisMonth)?.target_amount || 50000);
+      const thisMonthRev = revMap[thisMonth] || 0;
+      const thisMonthPct = Math.min(Math.round((thisMonthRev / thisMonthTarget) * 100), 100);
+
+      const lostReasonCount = {};
+      lostDeals.forEach(d => (d.lost_reason||[]).forEach(r => { lostReasonCount[r] = (lostReasonCount[r]||0)+1; }));
+
+      const typeCount = {};
+      deals.forEach(d => {
+        const types = d.project_types?.length ? d.project_types : d.project_type ? [d.project_type] : [];
+        types.forEach(t => { typeCount[t] = (typeCount[t]||0)+1; });
+      });
+
+      const BAR_H = 180;
+
+      if (loading) return <div className="loading">Loading dashboard...</div>;
+
+      return (
+        <div className="page-wrap">
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:10,marginBottom:24}}>
+            {[
+              { label: 'This month', value: fmt(thisMonthRev), sub: 'of ' + fmt(thisMonthTarget) + ' target', color: thisMonthRev >= thisMonthTarget ? 'var(--green)' : 'var(--text)' },
+              { label: 'Won & in production', value: fmt(totalWon), sub: wonDeals.length + ' projects', color: 'var(--green)' },
+              { label: 'Pipeline (quoted)', value: fmt(totalPipeline), sub: quotedDeals.length + ' projects', color: 'var(--blue)' },
+              { label: 'Total deals', value: deals.length, sub: lostDeals.length + ' lost', color: 'var(--text)' },
+            ].map(card => (
+              <div key={card.label} style={{background:'var(--surface2)',borderRadius:'var(--radius-md)',padding:'14px 16px'}}>
+                <div style={{fontSize:11,color:'var(--text-2)',marginBottom:4,fontWeight:500}}>{card.label}</div>
+                <div style={{fontSize:22,fontWeight:500,color:card.color,fontVariantNumeric:'tabular-nums'}}>{card.value}</div>
+                <div style={{fontSize:11,color:'var(--text-3)',marginTop:2}}>{card.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'16px 20px',marginBottom:16}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:8}}>
+              <span style={{fontSize:13,fontWeight:500}}>{thisMonth} — progress to target</span>
+              <span style={{fontSize:13,color:'var(--text-2)',fontVariantNumeric:'tabular-nums'}}>{fmt(thisMonthRev)} / {fmt(thisMonthTarget)}</span>
+            </div>
+            <div style={{height:8,background:'var(--surface2)',borderRadius:4,overflow:'hidden'}}>
+              <div style={{height:'100%',width:thisMonthPct + '%',background: thisMonthPct >= 100 ? 'var(--green)' : thisMonthPct >= 60 ? 'var(--blue)' : 'var(--amber)',borderRadius:4}}></div>
+            </div>
+            <div style={{fontSize:11,color:'var(--text-3)',marginTop:6}}>{thisMonthPct}% of target — {fmt(Math.max(thisMonthTarget - thisMonthRev, 0))} still needed</div>
+          </div>
+
+          <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'20px',marginBottom:16}}>
+            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
+              <div>
+                <div style={{fontSize:14,fontWeight:500}}>Revenue vs target {year}</div>
+                <div style={{display:'flex',gap:14,marginTop:6}}>
+                  {[{color:'var(--green)',label:'Won / in production'},{color:'#B5D4F4',label:'Pipeline'},{color:'var(--red)',label:'Target'}].map(l => (
+                    <div key={l.label} style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'var(--text-2)'}}>
+                      <div style={{width:10,height:10,borderRadius:2,background:l.color}}></div>{l.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div style={{display:'flex',border:'1px solid var(--border-med)',borderRadius:'var(--radius-sm)',overflow:'hidden'}}>
+                <button onClick={() => setView('monthly')} style={{padding:'5px 12px',fontSize:12,border:'none',cursor:'pointer',fontFamily:'inherit',background: view==='monthly' ? 'var(--text)' : 'transparent',color: view==='monthly' ? 'white' : 'var(--text-2)'}}>Monthly</button>
+                <button onClick={() => setView('quarterly')} style={{padding:'5px 12px',fontSize:12,border:'none',cursor:'pointer',fontFamily:'inherit',background: view==='quarterly' ? 'var(--text)' : 'transparent',color: view==='quarterly' ? 'white' : 'var(--text-2)'}}>Quarterly</button>
+              </div>
+            </div>
+
+            <div style={{display:'flex',gap: view==='monthly' ? 4 : 24,alignItems:'flex-end',height:BAR_H+30,paddingBottom:24,position:'relative'}}>
+              <div style={{position:'absolute',left:0,right:0,bottom:24+Math.round(((view==='monthly'?50000:150000)/maxVal)*BAR_H),borderTop:'1.5px dashed #E24B4A',opacity:0.5,pointerEvents:'none'}}></div>
+              {chartData.map(d => {
+                const revH = Math.max(Math.round((d.revenue/maxVal)*BAR_H), d.revenue > 0 ? 3 : 0);
+                const pipH = Math.max(Math.round((d.pipeline/maxVal)*BAR_H), d.pipeline > 0 ? 3 : 0);
+                const isNow = view === 'monthly' && d.label === thisMonth;
+                return (
+                  <div key={d.label} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:3,flex: view==='monthly' ? 1 : '0 0 80px',minWidth: view==='monthly' ? 12 : 80}}>
+                    <div style={{display:'flex',alignItems:'flex-end',gap:2,height:BAR_H,width:'100%',justifyContent:'center'}}>
+                      <div style={{width: view==='monthly' ? '45%' : 34,minWidth:4,height:Math.max(revH,1),background:'var(--green)',borderRadius:'2px 2px 0 0',opacity: isNow ? 1 : 0.8}}></div>
+                      <div style={{width: view==='monthly' ? '45%' : 34,minWidth:4,height:Math.max(pipH,pipH>0?2:0),background:'#B5D4F4',border: pipH>0 ? '1px solid #378ADD' : 'none',borderRadius:'2px 2px 0 0'}}></div>
+                    </div>
+                    <div style={{fontSize: view==='monthly' ? 9 : 12,color: isNow ? 'var(--text)' : 'var(--text-3)',fontWeight: isNow ? 600 : 400,textAlign:'center'}}>{view==='monthly' ? d.short : d.label}</div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--text-3)',paddingTop:6,borderTop:'1px solid var(--border)'}}>
+              <span>£0</span><span>{fmt(Math.round(maxVal/2))}</span><span>{fmt(Math.round(maxVal))}</span>
+            </div>
+          </div>
+
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12}}>
+            <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'16px 20px'}}>
+              <div style={{fontSize:13,fontWeight:500,marginBottom:14}}>Lost reasons</div>
+              {Object.keys(lostReasonCount).length === 0 ? (
+                <div style={{fontSize:12,color:'var(--text-3)'}}>No lost deals yet</div>
+              ) : Object.entries(lostReasonCount).sort((a,b)=>b[1]-a[1]).map(([reason, count]) => (
+                <div key={reason} style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
+                  <div style={{flex:1,fontSize:12,color:'var(--text-2)'}}>{reason}</div>
+                  <div style={{width:80,height:6,background:'var(--surface2)',borderRadius:3,overflow:'hidden'}}>
+                    <div style={{height:'100%',width:Math.round((count/Math.max(lostDeals.length,1))*100)+'%',background:'var(--red)',borderRadius:3}}></div>
+                  </div>
+                  <div style={{fontSize:12,fontWeight:500,minWidth:16,textAlign:'right'}}>{count}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'16px 20px'}}>
+              <div style={{fontSize:13,fontWeight:500,marginBottom:14}}>Project types</div>
+              {Object.keys(typeCount).length === 0 ? (
+                <div style={{fontSize:12,color:'var(--text-3)'}}>No project types yet</div>
+              ) : Object.entries(typeCount).sort((a,b)=>b[1]-a[1]).map(([type, count]) => {
+                const total = Object.values(typeCount).reduce((s,v)=>s+v,0);
+                return (
+                  <div key={type} style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
+                    <div style={{flex:1,fontSize:12,color:'var(--text-2)'}}>{type}</div>
+                    <div style={{width:80,height:6,background:'var(--surface2)',borderRadius:3,overflow:'hidden'}}>
+                      <div style={{height:'100%',width:Math.round((count/total)*100)+'%',background:'var(--purple)',borderRadius:3}}></div>
+                    </div>
+                    <div style={{fontSize:12,fontWeight:500,minWidth:16,textAlign:'right'}}>{count}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================
     // APP SHELL
     // =====================
     function App() {
       const [session, setSession] = useState(null);
-      const [page, setPage] = useState('pipeline');
+      const [page, setPage] = useState('dashboard');
       const [loading, setLoading] = useState(true);
 
       useEffect(() => {
@@ -1705,12 +1975,13 @@
       const userName = userEmail.split('@')[0];
 
       const NAV = [
+        { id: 'dashboard', label: 'Dashboard', icon: '◈' },
         { id: 'pipeline', label: 'Pipeline', icon: '⬛' },
         { id: 'contacts', label: 'Contacts', icon: '◎' },
         { id: 'companies', label: 'Companies', icon: '⬡' },
       ];
 
-      const PAGE_TITLES = { pipeline: 'Pipeline', contacts: 'Contacts', companies: 'Companies' };
+      const PAGE_TITLES = { dashboard: 'Dashboard', pipeline: 'Pipeline', contacts: 'Contacts', companies: 'Companies' };
 
       return (
         <div className="app">
@@ -1739,6 +2010,7 @@
                 <span className="user-pill">{userEmail}</span>
               </div>
             </div>
+            {page === 'dashboard' && <DashboardPage />}
             {page === 'pipeline' && <KanbanBoard user={session.user} />}
             {page === 'contacts' && <ContactsPage />}
             {page === 'companies' && <CompaniesPage />}
