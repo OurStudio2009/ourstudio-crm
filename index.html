@@ -1750,6 +1750,363 @@
     }
 
     // =====================
+    // DIARY PAGE
+    // =====================
+    function DiaryPage() {
+      const [events, setEvents] = useState([]);
+      const [contacts, setContacts] = useState([]);
+      const [companies, setCompanies] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [currentDate, setCurrentDate] = useState(new Date());
+      const [showModal, setShowModal] = useState(false);
+      const [editEvent, setEditEvent] = useState(null);
+      const [selectedDay, setSelectedDay] = useState(null);
+
+      const ENTRY_TYPES = ['Event','Meeting','Conference','BD Trip'];
+      const ENTRY_COLOURS = {
+        Event: { bg: '#E6F1FB', border: '#378ADD', text: '#042C53', pill: '#378ADD' },
+        Meeting: { bg: '#E1F5EE', border: '#1D9E75', text: '#04342C', pill: '#1D9E75' },
+        Conference: { bg: '#FAEEDA', border: '#BA7517', text: '#412402', pill: '#BA7517' },
+        'BD Trip': { bg: '#EEEDFE', border: '#7F77DD', text: '#26215C', pill: '#7F77DD' },
+      };
+
+      useEffect(() => {
+        async function load() {
+          const [ev, ct, co] = await Promise.all([
+            db.from('diary_events').select('*').order('start_date'),
+            db.from('contacts').select('id, full_name, company_id').order('full_name'),
+            db.from('companies').select('id, name').order('name'),
+          ]);
+          setEvents(ev.data || []);
+          setContacts(ct.data || []);
+          setCompanies(co.data || []);
+          setLoading(false);
+        }
+        load();
+      }, []);
+
+      const year = currentDate.getFullYear();
+      const month = currentDate.getMonth();
+      const firstDay = new Date(year, month, 1);
+      const lastDay = new Date(year, month + 1, 0);
+      const startPad = (firstDay.getDay() + 6) % 7; // Mon=0
+      const daysInMonth = lastDay.getDate();
+
+      function toISO(d) { return d.toISOString().slice(0,10); }
+      function parseDate(s) { return s ? new Date(s + 'T00:00:00') : null; }
+
+      function dayStr(day) {
+        return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      }
+
+      function eventsForDay(day) {
+        const ds = dayStr(day);
+        return events.filter(e => {
+          const start = e.start_date;
+          const end = e.end_date || e.start_date;
+          return ds >= start && ds <= end;
+        });
+      }
+
+      function isEventStart(e, day) { return e.start_date === dayStr(day); }
+      function isMultiDay(e) { return e.end_date && e.end_date !== e.start_date; }
+
+      const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      const DAY_NAMES = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
+      const today = toISO(new Date());
+
+      function prevMonth() { setCurrentDate(new Date(year, month - 1, 1)); }
+      function nextMonth() { setCurrentDate(new Date(year, month + 1, 1)); }
+
+      async function deleteEvent(id) {
+        await db.from('diary_events').delete().eq('id', id);
+        setEvents(events.filter(e => e.id !== id));
+        setShowModal(false);
+        setEditEvent(null);
+      }
+
+      // Build grid cells
+      const cells = [];
+      for (let i = 0; i < startPad; i++) cells.push(null);
+      for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+      while (cells.length % 7 !== 0) cells.push(null);
+
+      const weeks = [];
+      for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i+7));
+
+      if (loading) return <div className="loading">Loading diary...</div>;
+
+      return (
+        <div className="page-wrap">
+          {showModal && (
+            <DiaryModal
+              event={editEvent}
+              contacts={contacts}
+              companies={companies}
+              entryTypes={ENTRY_TYPES}
+              defaultDate={selectedDay}
+              onSave={async () => {
+                setShowModal(false); setEditEvent(null); setSelectedDay(null);
+                const { data } = await db.from('diary_events').select('*').order('start_date');
+                setEvents(data || []);
+              }}
+              onDelete={deleteEvent}
+              onClose={() => { setShowModal(false); setEditEvent(null); setSelectedDay(null); }}
+              colours={ENTRY_COLOURS}
+            />
+          )}
+
+          {/* Header */}
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
+            <div style={{display:'flex',alignItems:'center',gap:12}}>
+              <button className="btn btn-ghost btn-sm" onClick={prevMonth}>←</button>
+              <span style={{fontSize:16,fontWeight:500,minWidth:160,textAlign:'center'}}>{MONTH_NAMES[month]} {year}</span>
+              <button className="btn btn-ghost btn-sm" onClick={nextMonth}>→</button>
+              <button className="btn btn-ghost btn-sm" onClick={() => setCurrentDate(new Date())} style={{fontSize:11}}>Today</button>
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:12}}>
+              {/* Legend */}
+              {Object.entries(ENTRY_COLOURS).map(([type, c]) => (
+                <div key={type} style={{display:'flex',alignItems:'center',gap:4,fontSize:11,color:'var(--text-2)'}}>
+                  <div style={{width:10,height:10,borderRadius:2,background:c.pill}}></div>{type}
+                </div>
+              ))}
+              <button className="btn btn-primary" onClick={() => { setEditEvent(null); setSelectedDay(null); setShowModal(true); }}>+ Add entry</button>
+            </div>
+          </div>
+
+          {/* Calendar grid */}
+          <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',overflow:'hidden'}}>
+            {/* Day headers */}
+            <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:'1px solid var(--border)'}}>
+              {DAY_NAMES.map(d => (
+                <div key={d} style={{padding:'8px 0',textAlign:'center',fontSize:11,fontWeight:600,color:'var(--text-3)',letterSpacing:'0.04em'}}>{d}</div>
+              ))}
+            </div>
+            {/* Weeks */}
+            {weeks.map((week, wi) => (
+              <div key={wi} style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom: wi < weeks.length-1 ? '1px solid var(--border)' : 'none'}}>
+                {week.map((day, di) => {
+                  const ds = day ? dayStr(day) : null;
+                  const isToday = ds === today;
+                  const dayEvents = day ? eventsForDay(day) : [];
+                  return (
+                    <div
+                      key={di}
+                      onClick={() => { if (day) { setSelectedDay(ds); setEditEvent(null); setShowModal(true); } }}
+                      style={{
+                        minHeight:90,
+                        padding:'6px 4px 4px 6px',
+                        borderRight: di < 6 ? '1px solid var(--border)' : 'none',
+                        background: !day ? 'var(--surface2)' : 'var(--surface)',
+                        cursor: day ? 'pointer' : 'default',
+                        position:'relative',
+                        transition:'background 0.1s',
+                      }}
+                      onMouseEnter={e => { if(day) e.currentTarget.style.background = 'var(--surface2)'; }}
+                      onMouseLeave={e => { if(day) e.currentTarget.style.background = 'var(--surface)'; }}
+                    >
+                      {day && (
+                        <>
+                          <div style={{
+                            width:22,height:22,borderRadius:'50%',
+                            background: isToday ? 'var(--text)' : 'transparent',
+                            color: isToday ? 'white' : 'var(--text-2)',
+                            fontSize:12,fontWeight: isToday ? 600 : 400,
+                            display:'flex',alignItems:'center',justifyContent:'center',
+                            marginBottom:3,
+                          }}>{day}</div>
+                          {dayEvents.map(e => {
+                            const c = ENTRY_COLOURS[e.entry_type] || ENTRY_COLOURS['Event'];
+                            const isStart = isEventStart(e, day);
+                            const multi = isMultiDay(e);
+                            const contact = contacts.find(ct => ct.id === e.contact_id);
+                            const company = companies.find(co => co.id === e.company_id);
+                            return (
+                              <div
+                                key={e.id}
+                                onClick={ev => { ev.stopPropagation(); setEditEvent(e); setShowModal(true); }}
+                                style={{
+                                  background: c.bg,
+                                  borderLeft: '3px solid ' + c.border,
+                                  borderRadius: multi ? (isStart ? '3px 0 0 3px' : '0') : '3px',
+                                  padding:'2px 5px',
+                                  marginBottom:2,
+                                  fontSize:10,
+                                  color: c.text,
+                                  fontWeight:500,
+                                  overflow:'hidden',
+                                  whiteSpace:'nowrap',
+                                  textOverflow:'ellipsis',
+                                  cursor:'pointer',
+                                }}
+                              >
+                                {isStart || !multi ? e.title : ''}
+                                {isStart && (contact || company) && (
+                                  <span style={{fontWeight:400,opacity:0.8}}> · {contact ? contact.full_name : company?.name}</span>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+
+          {/* Upcoming list */}
+          <div style={{marginTop:20}}>
+            <div style={{fontSize:13,fontWeight:500,marginBottom:12,color:'var(--text-2)'}}>Upcoming this month</div>
+            {events
+              .filter(e => e.start_date >= dayStr(1) && e.start_date <= dayStr(daysInMonth))
+              .sort((a,b) => a.start_date.localeCompare(b.start_date))
+              .map(e => {
+                const c = ENTRY_COLOURS[e.entry_type] || ENTRY_COLOURS['Event'];
+                const contact = contacts.find(ct => ct.id === e.contact_id);
+                const company = companies.find(co => co.id === e.company_id);
+                const start = parseDate(e.start_date);
+                const end = e.end_date ? parseDate(e.end_date) : null;
+                return (
+                  <div key={e.id} onClick={() => { setEditEvent(e); setShowModal(true); }}
+                    style={{display:'flex',alignItems:'center',gap:12,padding:'10px 14px',background:'var(--surface)',border:'1px solid var(--border)',borderLeft:'3px solid '+c.border,borderRadius:'var(--radius-sm)',marginBottom:6,cursor:'pointer'}}>
+                    <div style={{minWidth:70}}>
+                      <div style={{fontSize:12,fontWeight:500}}>{start?.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>
+                      {end && end > start && <div style={{fontSize:10,color:'var(--text-3)'}}>to {end.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>}
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:13,fontWeight:500}}>{e.title}</div>
+                      <div style={{fontSize:11,color:'var(--text-2)'}}>
+                        {[contact?.full_name, company?.name, e.location].filter(Boolean).join(' · ')}
+                      </div>
+                    </div>
+                    <span style={{fontSize:10,padding:'2px 7px',borderRadius:4,background:c.bg,color:c.text,fontWeight:500,border:'1px solid '+c.border}}>{e.entry_type}</span>
+                  </div>
+                );
+              })}
+              {events.filter(e => e.start_date >= dayStr(1) && e.start_date <= dayStr(daysInMonth)).length === 0 && (
+                <div className="empty">Nothing scheduled this month yet</div>
+              )}
+          </div>
+        </div>
+      );
+    }
+
+    // =====================
+    // DIARY MODAL
+    // =====================
+    function DiaryModal({ event, contacts, companies, entryTypes, defaultDate, onSave, onDelete, onClose, colours }) {
+      const isNew = !event?.id;
+      const [form, setForm] = useState(event || {
+        title: '',
+        entry_type: 'Meeting',
+        start_date: defaultDate || '',
+        end_date: '',
+        location: '',
+        company_id: '',
+        contact_id: '',
+        notes: '',
+      });
+      const [saving, setSaving] = useState(false);
+      function set(k,v) { setForm(f => ({...f,[k]:v})); }
+
+      const filteredContacts = form.company_id
+        ? contacts.filter(c => c.company_id === form.company_id)
+        : contacts;
+
+      async function handleSave() {
+        setSaving(true);
+        const payload = {...form};
+        Object.keys(payload).forEach(k => { if (payload[k] === '') payload[k] = null; });
+        if (!payload.end_date) payload.end_date = payload.start_date;
+        if (isNew) {
+          await db.from('diary_events').insert(payload);
+        } else {
+          await db.from('diary_events').update(payload).eq('id', form.id);
+        }
+        setSaving(false);
+        onSave();
+      }
+
+      const c = colours[form.entry_type] || colours['Event'];
+
+      return (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+          <div className="modal" style={{maxWidth:480}}>
+            <div className="modal-header" style={{borderLeft:'3px solid '+c.border}}>
+              <h3>{isNew ? 'New diary entry' : form.title || 'Edit entry'}</h3>
+              <button className="modal-close" onClick={onClose}>×</button>
+            </div>
+            <div className="modal-body">
+              {/* Entry type */}
+              <div className="form-group">
+                <label className="form-label">Type</label>
+                <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+                  {entryTypes.map(t => {
+                    const tc = colours[t];
+                    const sel = form.entry_type === t;
+                    return (
+                      <button key={t} type="button" onClick={() => set('entry_type',t)}
+                        style={{fontSize:12,padding:'4px 10px',borderRadius:4,border:'1px solid '+(sel ? tc.border : 'var(--border-med)'),background: sel ? tc.bg : 'transparent',color: sel ? tc.text : 'var(--text-2)',cursor:'pointer',fontFamily:'inherit',fontWeight: sel ? 500 : 400}}>
+                        {t}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Title</label>
+                <input className="form-input" value={form.title||''} onChange={e => set('title',e.target.value)} placeholder="e.g. MIPIM 2026, Meeting with Renaker..." />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Start date</label>
+                  <input className="form-input" type="date" value={form.start_date||''} onChange={e => set('start_date',e.target.value)} />
+                </div>
+                <div className="form-group">
+                  <label className="form-label">End date <span style={{fontWeight:400,color:'var(--text-3)'}}>— for multi-day</span></label>
+                  <input className="form-input" type="date" value={form.end_date||''} onChange={e => set('end_date',e.target.value)} />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Location</label>
+                <input className="form-input" value={form.location||''} onChange={e => set('location',e.target.value)} placeholder="e.g. Cannes, Manchester, Zoom..." />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label">Company</label>
+                  <select className="form-select" value={form.company_id||''} onChange={e => { set('company_id',e.target.value); set('contact_id',''); }}>
+                    <option value="">Select company...</option>
+                    {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Contact</label>
+                  <select className="form-select" value={form.contact_id||''} onChange={e => set('contact_id',e.target.value)}>
+                    <option value="">Select contact...</option>
+                    {filteredContacts.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}
+                  </select>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Notes</label>
+                <textarea className="form-textarea" value={form.notes||''} onChange={e => set('notes',e.target.value)} placeholder="What to discuss, follow-ups, context..." />
+              </div>
+            </div>
+            <div className="modal-footer">
+              {!isNew && <button className="btn btn-ghost" style={{marginRight:'auto',color:'var(--red)'}} onClick={() => onDelete(form.id)}>Delete</button>}
+              <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : 'Save entry'}</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // =====================
     // DASHBOARD
     // =====================
     function DashboardPage() {
@@ -2003,11 +2360,12 @@
       const NAV = [
         { id: 'dashboard', label: 'Dashboard', icon: '◈' },
         { id: 'pipeline', label: 'Pipeline', icon: '⬛' },
+        { id: 'diary', label: 'Diary', icon: '◻' },
         { id: 'contacts', label: 'Contacts', icon: '◎' },
         { id: 'companies', label: 'Companies', icon: '⬡' },
       ];
 
-      const PAGE_TITLES = { dashboard: 'Dashboard', pipeline: 'Pipeline', contacts: 'Contacts', companies: 'Companies' };
+      const PAGE_TITLES = { dashboard: 'Dashboard', pipeline: 'Pipeline', diary: 'Diary', contacts: 'Contacts', companies: 'Companies' };
 
       return (
         <div className="app">
@@ -2037,6 +2395,7 @@
               </div>
             </div>
             {page === 'dashboard' && <DashboardPage />}
+            {page === 'diary' && <DiaryPage />}
             {page === 'pipeline' && <KanbanBoard user={session.user} />}
             {page === 'contacts' && <ContactsPage />}
             {page === 'companies' && <CompaniesPage />}
