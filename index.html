@@ -756,7 +756,7 @@
     // DEAL MODAL
     // =====================
     function DealModal({ deal, companies, contacts, onSave, onClose, initialStage }) {
-      const isNew = !deal?.id;
+      const isNew = !(deal && deal.id);
       const [form, setForm] = useState(deal || {
         stage: initialStage || 'Enquiry',
         project_number: '',
@@ -1103,7 +1103,7 @@
           </div>
           <div className="card-num">#{deal.project_number}</div>
           <div className="card-name">{deal.project_name || 'Untitled'}</div>
-          <div className="card-client">{company?.name || '--'}</div>
+          <div className="card-client">{company ? company.name : '--'}</div>
           {showFee && (
             <div>
               <div className="card-fee">{fmt(deal.production_fee)}</div>
@@ -1282,9 +1282,9 @@
       useEffect(() => { load(); }, []);
 
       const filtered = contacts.filter(c =>
-        c.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-        c.companies?.name?.toLowerCase().includes(search.toLowerCase()) ||
-        c.job_title?.toLowerCase().includes(search.toLowerCase())
+        c.full_name ? c.full_name.toLowerCase() : ''.includes(search.toLowerCase()) ||
+        c.companies && c.companies.name ? c.companies.name.toLowerCase() : ''.includes(search.toLowerCase()) ||
+        c.job_title ? c.job_title.toLowerCase() : ''.includes(search.toLowerCase())
       );
 
       function exportCSV() {
@@ -1293,7 +1293,7 @@
           const parts = (c.full_name || '').trim().split(' ');
           const first = parts[0] || '';
           const last = parts.slice(1).join(' ') || '';
-          rows.push([first, last, c.email || '', c.companies?.name || '', c.job_title || '', c.contact_type || '', c.source || '']);
+          rows.push([first, last, c.email || '', c.companies ? c.companies.name : '', c.job_title || '', c.contact_type || '', c.source || '']);
         });
         const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -1347,7 +1347,7 @@
                       <div className="contact-role">{c.job_title || '--'}</div>
                     </div>
                   </div>
-                  {c.companies?.name && <div className="contact-company">{c.companies.name}</div>}
+                  {c.companies && c.companies.name && <div className="contact-company">{c.companies.name}</div>}
                   {c.email && <div style={{fontSize:12,color:'var(--blue)',marginBottom:4}}>{c.email}</div>}
                   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:8}}>
                     {c.source && <span className="source-badge">{c.source}</span>}
@@ -1373,7 +1373,7 @@
                     <div className="contact-avatar" style={{width:26,height:26,fontSize:10,flexShrink:0}}>{initials(c.full_name)}</div>
                     <span style={{fontSize:13,fontWeight:500}}>{c.full_name}</span>
                   </div>
-                  <div style={{fontSize:12,color:'var(--text-2)'}}>{c.companies?.name || '--'}</div>
+                  <div style={{fontSize:12,color:'var(--text-2)'}}>{c.companies ? c.companies.name : '--'}</div>
                   <div style={{fontSize:12,color:'var(--text-2)'}}>{c.job_title || '--'}</div>
                   <div style={{fontSize:12,color:'var(--blue)'}}>{c.email || '--'}</div>
                   <button className="btn btn-ghost btn-sm" onClick={() => { setEditContact(c); setShowModal(true); }}>Edit</button>
@@ -1390,7 +1390,7 @@
     // CONTACT MODAL
     // =====================
     function ContactModal({ contact, companies, onSave, onClose }) {
-      const isNew = !contact?.id;
+      const isNew = !(contact && contact.id);
       const [form, setForm] = useState(contact || { full_name:'', job_title:'', company_id:'', email:'', contact_type:'Prospect', source:'', tags:[], notes:'' });
       const [saving, setSaving] = useState(false);
       function set(k,v) { setForm(f => ({...f,[k]:v})); }
@@ -1504,7 +1504,7 @@
       }
 
       const filtered = companies.filter(c => {
-        const matchSearch = c.name?.toLowerCase().includes(search.toLowerCase());
+        const matchSearch = c.name ? c.name.toLowerCase() : ''.includes(search.toLowerCase());
         const matchStatus = filterStatus === 'all' || c.status === filterStatus;
         return matchSearch && matchStatus;
       });
@@ -1671,7 +1671,7 @@
     // COMPANY MODAL
     // =====================
     function CompanyModal({ company, onSave, onClose }) {
-      const isNew = !company?.id;
+      const isNew = !(company && company.id);
       const [form, setForm] = useState(company || { name:'', type:'', website:'', region:'', status:'Prospect', needs_chase: false, notes:'' });
       const [saving, setSaving] = useState(false);
       function set(k,v) { setForm(f => ({...f,[k]:v})); }
@@ -1860,9 +1860,9 @@
           {/* Header */}
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
             <div style={{display:'flex',alignItems:'center',gap:12}}>
-              <button className="btn btn-ghost btn-sm" onClick={prevMonth}><</button>
+              <button className="btn btn-ghost btn-sm" onClick={prevMonth}>Prev</button>
               <span style={{fontSize:16,fontWeight:500,minWidth:160,textAlign:'center'}}>{MONTH_NAMES[month]} {year}</span>
-              <button className="btn btn-ghost btn-sm" onClick={nextMonth}>></button>
+              <button className="btn btn-ghost btn-sm" onClick={nextMonth}>Next</button>
               <button className="btn btn-ghost btn-sm" onClick={() => setCurrentDate(new Date())} style={{fontSize:11}}>Today</button>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:12}}>
@@ -1980,13 +1980,13 @@
                   <div key={e.id} onClick={() => { setEditEvent(e); setShowModal(true); }}
                     style={{display:'flex',alignItems:'center',gap:12,padding:'10px 14px',background:'var(--surface)',border:'1px solid var(--border)',borderLeft:'3px solid '+c.border,borderRadius:'var(--radius-sm)',marginBottom:6,cursor:'pointer'}}>
                     <div style={{minWidth:70}}>
-                      <div style={{fontSize:12,fontWeight:500}}>{start?.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>
+                      <div style={{fontSize:12,fontWeight:500}}>{start ? start.toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : ''}</div>
                       {end && end > start && <div style={{fontSize:10,color:'var(--text-3)'}}>to {end.toLocaleDateString('en-GB',{day:'numeric',month:'short'})}</div>}
                     </div>
                     <div style={{flex:1}}>
                       <div style={{fontSize:13,fontWeight:500}}>{e.title}</div>
                       <div style={{fontSize:11,color:'var(--text-2)'}}>
-                        {[e.start_time ? e.start_time.slice(0,5) + (e.end_time ? '-'+e.end_time.slice(0,5) : '') : null, contact?.full_name, company?.name, e.location].filter(Boolean).join(' . ')}
+                        {[e.start_time ? e.start_time.slice(0,5) + (e.end_time ? '-'+e.end_time.slice(0,5) : '') : null, contact ? contact.full_name : null, company ? company.name : null, e.location].filter(Boolean).join(' | ')}
                       </div>
                     </div>
                     <span style={{fontSize:10,padding:'2px 7px',borderRadius:4,background:c.bg,color:c.text,fontWeight:500,border:'1px solid '+c.border}}>{e.entry_type}</span>
@@ -2005,7 +2005,7 @@
     // DIARY MODAL
     // =====================
     function DiaryModal({ event, contacts, companies, entryTypes, defaultDate, onSave, onDelete, onClose, colours }) {
-      const isNew = !event?.id;
+      const isNew = !(event && event.id);
       const [form, setForm] = useState(event || {
         title: '',
         entry_type: 'Meeting',
@@ -2222,7 +2222,7 @@
 
       const now = new Date();
       const thisMonth = MONTH_ORDER[now.getMonth()] + ' ' + now.getFullYear();
-      const thisMonthTarget = parseFloat(targets.find(t => t.month_label === thisMonth)?.target_amount || 50000);
+      const thisMonthTarget = parseFloat((targets.find(t => t.month_label === thisMonth) || {target_amount: 50000}).target_amount);
       const thisMonthRev = revMap[thisMonth] || 0;
       const thisMonthPct = Math.min(Math.round((thisMonthRev / thisMonthTarget) * 100), 100);
 
@@ -2231,7 +2231,7 @@
 
       const typeCount = {};
       deals.forEach(d => {
-        const types = d.project_types?.length ? d.project_types : d.project_type ? [d.project_type] : [];
+        const types = d.project_types && d.project_types.length ? d.project_types : d.project_type ? [d.project_type] : [];
         types.forEach(t => { typeCount[t] = (typeCount[t]||0)+1; });
       });
 
