@@ -51,6 +51,7 @@
       line-height: 1.5;
     }
 
+    /* LAYOUT */
     .app { display: flex; min-height: 100vh; }
 
     .sidebar {
@@ -146,7 +147,10 @@
       font-family: inherit;
     }
 
-    .btn-primary { background: var(--text); color: white; }
+    .btn-primary {
+      background: var(--text);
+      color: white;
+    }
     .btn-primary:hover { background: #333; }
 
     .btn-ghost {
@@ -158,6 +162,7 @@
 
     .btn-sm { padding: 5px 10px; font-size: 12px; }
 
+    /* AUTH */
     .auth-wrap {
       min-height: 100vh;
       display: flex;
@@ -195,7 +200,10 @@
       outline: none;
     }
 
-    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--text); }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--text);
+    }
+
     .form-textarea { resize: vertical; min-height: 80px; }
 
     .error-msg {
@@ -207,6 +215,7 @@
       margin-bottom: 16px;
     }
 
+    /* KANBAN */
     .kanban-wrap { padding: 24px 28px; overflow-x: auto; }
 
     .kanban-board {
@@ -216,7 +225,10 @@
       align-items: flex-start;
     }
 
-    .kanban-col { width: 240px; flex-shrink: 0; }
+    .kanban-col {
+      width: 240px;
+      flex-shrink: 0;
+    }
 
     .col-header {
       display: flex;
@@ -227,7 +239,12 @@
     }
 
     .col-title-wrap { display: flex; align-items: center; gap: 8px; }
-    .col-pip { width: 8px; height: 8px; border-radius: 50%; }
+
+    .col-pip {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+
     .col-title { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
     .col-count {
       font-size: 11px;
@@ -238,7 +255,13 @@
       padding: 1px 7px;
     }
 
-    .col-total { font-size: 11px; color: var(--text-2); padding: 0 12px 8px; font-variant-numeric: tabular-nums; }
+    .col-total {
+      font-size: 11px;
+      color: var(--text-2);
+      padding: 0 12px 8px;
+      font-variant-numeric: tabular-nums;
+    }
+
     .col-total strong { color: var(--text); font-weight: 500; }
 
     .col-body {
@@ -252,6 +275,7 @@
 
     .col-body.drag-over { background: #EBF0FA; border-color: var(--blue); }
 
+    /* DEAL CARD */
     .deal-card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -273,11 +297,19 @@
     .card-num { font-size: 10px; color: var(--text-3); font-family: 'DM Mono', monospace; margin-bottom: 3px; }
     .card-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; line-height: 1.3; }
     .card-client { font-size: 11px; color: var(--text-2); margin-bottom: 8px; }
+
     .card-fee { font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
     .card-fee-sub { font-size: 10px; color: var(--text-3); }
+
     .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
 
-    .type-badge { font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 500; }
+    .type-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
     .badge-avr { background: var(--purple-light); color: var(--purple); }
     .badge-cgi { background: var(--green-light); color: var(--green); }
     .badge-animation { background: var(--blue-light); color: var(--blue); }
@@ -286,99 +318,208 @@
     .badge-other { background: var(--grey-light); color: var(--text-2); }
 
     .info-toggle {
-      font-size: 10px; padding: 2px 7px; border-radius: 4px; font-weight: 500;
-      cursor: pointer; border: none; font-family: inherit;
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-family: inherit;
     }
+
     .info-received { background: var(--green-light); color: var(--green); }
     .info-awaiting { background: var(--amber-light); color: var(--amber); }
 
-    .chase-dot { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--amber); }
-    .chase-dot::before { content: ''; width: 5px; height: 5px; border-radius: 50%; background: var(--amber); flex-shrink: 0; }
+    .chase-dot {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      color: var(--amber);
+    }
 
-    .card-actions { position: absolute; top: 8px; right: 8px; display: none; gap: 4px; }
+    .chase-dot::before {
+      content: '';
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--amber);
+      flex-shrink: 0;
+    }
+
+    .card-actions {
+      position: absolute;
+      top: 8px; right: 8px;
+      display: none;
+      gap: 4px;
+    }
+
     .deal-card:hover .card-actions { display: flex; }
 
     .card-action-btn {
-      width: 22px; height: 22px; border-radius: 4px; border: 1px solid var(--border);
-      background: var(--surface); color: var(--text-2); font-size: 11px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      width: 22px; height: 22px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-2);
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+
     .card-action-btn:hover { background: var(--surface2); color: var(--text); }
 
     .add-card-btn {
-      width: 100%; padding: 8px; border: 1px dashed var(--border-med); border-radius: var(--radius-sm);
-      background: transparent; color: var(--text-3); font-size: 12px; cursor: pointer;
-      text-align: center; transition: all 0.15s; font-family: inherit; margin-top: 4px;
+      width: 100%;
+      padding: 8px;
+      border: 1px dashed var(--border-med);
+      border-radius: var(--radius-sm);
+      background: transparent;
+      color: var(--text-3);
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+      font-family: inherit;
+      margin-top: 4px;
     }
+
     .add-card-btn:hover { background: var(--surface); color: var(--text-2); border-color: var(--text-3); }
 
+    /* MODAL */
     .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200;
-      display: flex; align-items: center; justify-content: center; padding: 24px;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
     }
 
     .modal {
-      background: var(--surface); border-radius: var(--radius); width: 100%;
-      max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-md);
+      background: var(--surface);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 580px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-md);
     }
 
     .modal-header {
-      padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-      position: sticky; top: 0; background: var(--surface); z-index: 1;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+      z-index: 1;
     }
 
     .modal-header h3 { font-size: 15px; font-weight: 500; }
     .modal-close {
-      width: 28px; height: 28px; border-radius: var(--radius-sm); border: 1px solid var(--border);
-      background: transparent; color: var(--text-2); font-size: 16px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-2);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .modal-body { padding: 20px 24px; }
     .modal-footer {
-      padding: 14px 24px; border-top: 1px solid var(--border);
-      display: flex; justify-content: flex-end; gap: 8px;
-      position: sticky; bottom: 0; background: var(--surface);
+      padding: 14px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      position: sticky;
+      bottom: 0;
+      background: var(--surface);
     }
 
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .form-section { margin-bottom: 20px; }
     .form-section-title {
-      font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
-      color: var(--text-3); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
     }
 
-    .stage-indicator { display: flex; gap: 4px; margin-bottom: 20px; flex-wrap: wrap; }
-    .stage-tab {
-      font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border);
-      cursor: pointer; font-family: inherit; transition: all 0.15s; background: transparent; color: var(--text-2);
+    /* STAGE TABS IN MODAL */
+    .stage-indicator {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
     }
+
+    .stage-tab {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.15s;
+      background: transparent;
+      color: var(--text-2);
+    }
+
     .stage-tab.active-stage { background: var(--text); color: white; border-color: var(--text); }
 
-    /* FEE ALLOCATION — updated for 5 months */
+    /* FEE ALLOCATION */
     .fee-alloc { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; margin-top: 8px; }
     .fee-alloc-title { font-size: 11px; font-weight: 600; color: var(--text-2); margin-bottom: 10px; letter-spacing: 0.03em; }
     .fee-alloc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
     .fee-alloc-total { font-size: 11px; color: var(--text-2); margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
     .fee-alloc-total strong { color: var(--text); }
 
+    /* CHECKBOXES */
     .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
     .checkbox-item { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; }
     .checkbox-item input { width: 15px; height: 15px; cursor: pointer; accent-color: var(--text); }
 
+    /* CONTACTS PAGE */
     .page-wrap { padding: 28px; }
     .contacts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 20px; }
 
     .contact-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 16px; cursor: pointer; transition: box-shadow 0.15s;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: box-shadow 0.15s;
     }
+
     .contact-card:hover { box-shadow: var(--shadow-md); }
 
     .contact-avatar {
-      width: 36px; height: 36px; border-radius: 50%; background: var(--blue-light); color: var(--blue);
-      display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--blue-light);
+      color: var(--blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
     }
 
     .contact-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
@@ -387,24 +528,84 @@
     .contact-company { font-size: 12px; color: var(--text-2); margin-bottom: 8px; }
 
     .tag-list { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
-    .tag { font-size: 10px; padding: 2px 7px; border-radius: 4px; background: var(--grey-light); color: var(--text-2); }
-    .source-badge { font-size: 10px; padding: 2px 7px; border-radius: 4px; background: var(--purple-light); color: var(--purple); font-weight: 500; }
-
-    .search-bar { position: relative; max-width: 300px; }
-    .search-bar input {
-      width: 100%; padding: 8px 12px 8px 32px; border: 1px solid var(--border-med);
-      border-radius: var(--radius-sm); font-size: 13px; background: var(--surface); color: var(--text);
-      outline: none; font-family: inherit;
+    .tag {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--grey-light);
+      color: var(--text-2);
     }
+
+    .source-badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: var(--purple-light);
+      color: var(--purple);
+      font-weight: 500;
+    }
+
+    /* SEARCH */
+    .search-bar {
+      position: relative;
+      max-width: 300px;
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 8px 12px 8px 32px;
+      border: 1px solid var(--border-med);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      font-family: inherit;
+    }
+
     .search-bar input:focus { border-color: var(--text); }
-    .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-3); font-size: 13px; pointer-events: none; }
 
-    .loading { display: flex; align-items: center; justify-content: center; height: 200px; color: var(--text-3); font-size: 13px; }
-    .empty { text-align: center; padding: 32px 16px; color: var(--text-3); font-size: 12px; }
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+      font-size: 13px;
+      pointer-events: none;
+    }
 
+    /* LOADING */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: var(--text-3);
+      font-size: 13px;
+    }
+
+    /* EMPTY STATE */
+    .empty {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-3);
+      font-size: 12px;
+    }
+
+    /* TOPBAR ACTIONS */
     .topbar-right { display: flex; align-items: center; gap: 10px; }
-    .user-pill { font-size: 12px; color: var(--text-2); background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 12px; }
 
+    .user-pill {
+      font-size: 12px;
+      color: var(--text-2);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+    }
+
+    /* STAGE COLORS */
     .pip-enquiry { background: #888780; }
     .pip-quoted { background: var(--blue); }
     .pip-pending { background: var(--purple); }
@@ -412,20 +613,14 @@
     .pip-production { background: var(--teal); }
     .pip-lost { background: var(--red); }
 
+    /* TAGS INPUT */
     .tags-input-wrap { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px 8px; border: 1px solid var(--border-med); border-radius: var(--radius-sm); min-height: 38px; cursor: text; }
     .tags-input-wrap:focus-within { border-color: var(--text); }
     .tags-input-wrap input { border: none; outline: none; font-size: 13px; font-family: inherit; background: transparent; min-width: 80px; flex: 1; }
     .tag-item { display: flex; align-items: center; gap: 4px; background: var(--grey-light); padding: 2px 6px; border-radius: 4px; font-size: 11px; }
     .tag-remove { cursor: pointer; color: var(--text-3); font-size: 13px; line-height: 1; border: none; background: none; padding: 0; }
 
-    /* ARCHIVE PAGE */
-    .archive-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-top: 20px; }
-    .archive-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 16px; opacity: 0.85; transition: opacity 0.15s, box-shadow 0.15s;
-    }
-    .archive-card:hover { opacity: 1; box-shadow: var(--shadow-md); }
-
+    /* SCROLLBAR */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border-med); border-radius: 3px; }
@@ -454,7 +649,6 @@
     const COMPANY_TYPES = ['Developer','Architect','Landscape Architect','Interior Designer','Planning Consultancy','Design Agency','Contractor','PRS','Housing Association','Supplier','Agent','Other'];
     const REGIONS = ['North West','Yorkshire','Midlands','London','National','Other'];
 
-    // ── EXTENDED: 20 months window for fee month dropdowns ──
     const MONTHS = (() => {
       const m = [];
       const now = new Date();
@@ -466,7 +660,7 @@
     })();
 
     function fmt(n) {
-      if (!n && n !== 0) return '—';
+      if (!n && n !== 0) return '--';
       return '£' + Number(n).toLocaleString('en-GB', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
@@ -519,10 +713,10 @@
               </div>
               <div className="form-group">
                 <label className="form-label">Password</label>
-                <input className="form-input" type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
+                <input className="form-input" type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="........" />
               </div>
               <button className="btn btn-primary" style={{width:'100%', marginTop: 4}} type="submit" disabled={loading}>
-                {loading ? 'Signing in…' : 'Sign in'}
+                {loading ? 'Signing in...' : 'Sign in'}
               </button>
             </form>
           </div>
@@ -550,16 +744,16 @@
           {value.map(t => (
             <span key={t} className="tag-item">
               {t}
-              <button className="tag-remove" onClick={() => remove(t)}>×</button>
+              <button className="tag-remove" onClick={() => remove(t)}>x</button>
             </span>
           ))}
-          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKey} placeholder={value.length ? '' : 'Type and press enter…'} />
+          <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={onKey} placeholder={value.length ? '' : 'Type and press enter...'} />
         </div>
       );
     }
 
     // =====================
-    // DEAL MODAL — fee months extended to 5
+    // DEAL MODAL
     // =====================
     function DealModal({ deal, companies, contacts, onSave, onClose, initialStage }) {
       const isNew = !deal?.id;
@@ -583,10 +777,6 @@
         fee_month_2_amount: '',
         fee_month_3_label: '',
         fee_month_3_amount: '',
-        fee_month_4_label: '',
-        fee_month_4_amount: '',
-        fee_month_5_label: '',
-        fee_month_5_amount: '',
         start_month: '',
         delivery_month: '',
         start_date: '',
@@ -596,7 +786,6 @@
         production_status: [],
         owner: 'Sam',
         notes: '',
-        archived: false,
       });
       const [saving, setSaving] = useState(false);
 
@@ -607,14 +796,8 @@
         set('lost_reason', cur.includes(r) ? cur.filter(x => x !== r) : [...cur, r]);
       }
 
-      // ── EXTENDED: 5 months ──
-      const allocTotal = [
-        form.fee_month_1_amount,
-        form.fee_month_2_amount,
-        form.fee_month_3_amount,
-        form.fee_month_4_amount,
-        form.fee_month_5_amount,
-      ].reduce((s, v) => s + (parseFloat(v) || 0), 0);
+      const allocTotal = [form.fee_month_1_amount, form.fee_month_2_amount, form.fee_month_3_amount]
+        .reduce((s, v) => s + (parseFloat(v) || 0), 0);
 
       async function handleSave() {
         setSaving(true);
@@ -642,10 +825,10 @@
           <div className="modal">
             <div className="modal-header">
               <div>
-                <h3>{isNew ? 'New deal' : `Edit — ${form.project_name || 'Untitled'}`}</h3>
+                <h3>{isNew ? 'New deal' : `Edit - ${form.project_name || 'Untitled'}`}</h3>
                 {form.project_number && <div style={{fontSize:11,color:'var(--text-3)',fontFamily:'DM Mono',marginTop:2}}>#{form.project_number}</div>}
               </div>
-              <button className="modal-close" onClick={onClose}>×</button>
+              <button className="modal-close" onClick={onClose}>x</button>
             </div>
             <div className="modal-body">
 
@@ -682,20 +865,20 @@
                   <div className="form-group">
                     <label className="form-label">Client company</label>
                     <select className="form-select" value={form.company_id || ''} onChange={e => set('company_id', e.target.value)}>
-                      <option value="">Select company…</option>
+                      <option value="">Select company...</option>
                       {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                   </div>
                   <div className="form-group">
                     <label className="form-label">Client contact</label>
                     <select className="form-select" value={form.contact_id || ''} onChange={e => set('contact_id', e.target.value)}>
-                      <option value="">Select contact…</option>
+                      <option value="">Select contact...</option>
                       {contacts.map(c => <option key={c.id} value={c.id}>{c.full_name}</option>)}
                     </select>
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Project type <span style={{fontWeight:400,color:'var(--text-3)'}}>— select all that apply</span></label>
+                  <label className="form-label">Project type <span style={{fontWeight:400,color:'var(--text-3)'}}>- select all that apply</span></label>
                   <div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:4}}>
                     {PROJECT_TYPES.map(t => {
                       const selected = (form.project_types || []).includes(t);
@@ -755,7 +938,7 @@
                 </div>
               )}
 
-              {/* Follow-up */}
+              {/* Pending likely */}
               {showPending && (
                 <div className="form-section">
                   <div className="form-section-title">Follow-up</div>
@@ -766,7 +949,7 @@
                 </div>
               )}
 
-              {/* Won — revenue allocation with 5 months */}
+              {/* Won */}
               {showWon && (
                 <div className="form-section">
                   <div className="form-section-title">Revenue allocation</div>
@@ -774,24 +957,24 @@
                     <div className="form-group">
                       <label className="form-label">Start month</label>
                       <select className="form-select" value={form.start_month || ''} onChange={e => set('start_month', e.target.value)}>
-                        <option value="">Select…</option>
+                        <option value="">Select...</option>
                         {MONTHS.map(m => <option key={m}>{m}</option>)}
                       </select>
                     </div>
                     <div className="form-group">
                       <label className="form-label">Delivery month</label>
                       <select className="form-select" value={form.delivery_month || ''} onChange={e => set('delivery_month', e.target.value)}>
-                        <option value="">Select…</option>
+                        <option value="">Select...</option>
                         {MONTHS.map(m => <option key={m}>{m}</option>)}
                       </select>
                     </div>
                   </div>
                   <div className="fee-alloc">
-                    <div className="fee-alloc-title">Split production fee across months — up to 5 months</div>
-                    {[1,2,3,4,5].map(i => (
+                    <div className="fee-alloc-title">Split production fee across months</div>
+                    {[1,2,3].map(i => (
                       <div key={i} className="fee-alloc-row">
                         <select className="form-select" value={form[`fee_month_${i}_label`] || ''} onChange={e => set(`fee_month_${i}_label`, e.target.value)}>
-                          <option value="">Month {i}…</option>
+                          <option value="">Month {i}...</option>
                           {MONTHS.map(m => <option key={m}>{m}</option>)}
                         </select>
                         <input className="form-input" type="number" placeholder="£0" value={form[`fee_month_${i}_amount`] || ''} onChange={e => set(`fee_month_${i}_amount`, e.target.value)} />
@@ -801,7 +984,7 @@
                       Allocated: <strong>{fmt(allocTotal)}</strong>
                       {form.production_fee && allocTotal !== parseFloat(form.production_fee) && (
                         <span style={{color:'var(--amber)',marginLeft:8}}>
-                          ≠ production fee ({fmt(form.production_fee)})
+                          != production fee ({fmt(form.production_fee)})
                         </span>
                       )}
                     </div>
@@ -812,7 +995,7 @@
               {/* Won status */}
               {stage === 'Won' && (
                 <div className="form-section">
-                  <div className="form-section-title">Confirmation status <span style={{fontWeight:400,color:'var(--text-3)'}}>— select all that apply</span></div>
+                  <div className="form-section-title">Confirmation status <span style={{fontWeight:400,color:'var(--text-3)'}}>- select all that apply</span></div>
                   <div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:4}}>
                     {WON_STATUS.map(s => {
                       const selected = (form.won_status || []).includes(s);
@@ -821,7 +1004,7 @@
                           const cur = form.won_status || [];
                           set('won_status', selected ? cur.filter(x => x !== s) : [...cur, s]);
                         }} style={{fontSize:12,padding:'4px 10px',borderRadius:4,border:'1px solid ' + (selected ? 'var(--green)' : 'var(--border-med)'),background: selected ? 'var(--green-light)' : 'transparent',color: selected ? 'var(--green)' : 'var(--text-2)',cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s'}}>
-                          {selected ? '✓ ' : ''}{s}
+                          {selected ? '' : ''}{s}
                         </button>
                       );
                     })}
@@ -844,19 +1027,16 @@
                     </div>
                   </div>
                   <div className="form-group" style={{marginTop:12}}>
-                    <div className="form-section-title" style={{marginBottom:8}}>Completion status <span style={{fontWeight:400,color:'var(--text-3)'}}>— select all that apply</span></div>
+                    <div className="form-section-title" style={{marginBottom:8}}>Completion status <span style={{fontWeight:400,color:'var(--text-3)'}}>- select all that apply</span></div>
                     <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
                       {PRODUCTION_STATUS.map(s => {
                         const selected = (form.production_status || []).includes(s);
-                        const isInvoiced = s === 'Invoiced';
                         return (
                           <button key={s} type="button" onClick={() => {
                             const cur = form.production_status || [];
-                            const nowSelected = !selected;
-                            set('production_status', nowSelected ? [...cur, s] : cur.filter(x => x !== s));
-                            if (isInvoiced) set('archived', nowSelected);
-                          }} style={{fontSize:12,padding:'4px 10px',borderRadius:4,border:'1px solid ' + (selected ? (isInvoiced ? 'var(--green)' : 'var(--teal)') : 'var(--border-med)'),background: selected ? (isInvoiced ? 'var(--green-light)' : 'var(--teal-light)') : 'transparent',color: selected ? (isInvoiced ? 'var(--green)' : 'var(--teal)') : 'var(--text-2)',cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s'}}>
-                            {selected ? '✓ ' : ''}{s}{isInvoiced && !selected ? ' → archive' : ''}
+                            set('production_status', selected ? cur.filter(x => x !== s) : [...cur, s]);
+                          }} style={{fontSize:12,padding:'4px 10px',borderRadius:4,border:'1px solid ' + (selected ? 'var(--teal)' : 'var(--border-med)'),background: selected ? 'var(--teal-light)' : 'transparent',color: selected ? 'var(--teal)' : 'var(--text-2)',cursor:'pointer',fontFamily:'inherit',transition:'all 0.15s'}}>
+                            {selected ? '' : ''}{s}
                           </button>
                         );
                       })}
@@ -883,13 +1063,13 @@
               {/* Notes */}
               <div className="form-section">
                 <div className="form-section-title">Notes</div>
-                <textarea className="form-textarea" value={form.notes || ''} onChange={e => set('notes', e.target.value)} placeholder="Any additional context…" />
+                <textarea className="form-textarea" value={form.notes || ''} onChange={e => set('notes', e.target.value)} placeholder="Any additional context..." />
               </div>
 
             </div>
             <div className="modal-footer">
               <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save deal'}</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : 'Save deal'}</button>
             </div>
           </div>
         </div>
@@ -899,7 +1079,7 @@
     // =====================
     // DEAL CARD
     // =====================
-    function DealCard({ deal, companies, contacts, onEdit, onDragStart, onArchive }) {
+    function DealCard({ deal, companies, contacts, onEdit, onDragStart }) {
       const company = companies.find(c => c.id === deal.company_id);
       const showFee = ['Quoted','Pending Likely','Won','Production','Lost'].includes(deal.stage);
       const cardClass = `deal-card ${deal.stage === 'Won' ? 'won-card' : ''} ${deal.stage === 'Production' ? 'production-card' : ''} ${deal.stage === 'Lost' ? 'lost-card' : ''}`;
@@ -911,8 +1091,6 @@
         onEdit(null, true);
       }
 
-      const canArchive = deal.stage === 'Production';
-
       return (
         <div
           className={cardClass}
@@ -921,16 +1099,11 @@
           onClick={() => onEdit(deal)}
         >
           <div className="card-actions">
-            <button className="card-action-btn" onClick={e => { e.stopPropagation(); onEdit(deal); }} title="Edit">✎</button>
-            {canArchive && (
-              <button className="card-action-btn" title="Archive deal"
-                onClick={e => { e.stopPropagation(); if (window.confirm('Archive this deal? It will move to the Archive page but still count in revenue figures.')) onArchive(deal.id); }}
-                style={{color:'var(--teal)'}}>⊠</button>
-            )}
+            <button className="card-action-btn" onClick={e => { e.stopPropagation(); onEdit(deal); }} title="Edit">Edit</button>
           </div>
           <div className="card-num">#{deal.project_number}</div>
           <div className="card-name">{deal.project_name || 'Untitled'}</div>
-          <div className="card-client">{company?.name || '—'}</div>
+          <div className="card-client">{company?.name || '--'}</div>
           {showFee && (
             <div>
               <div className="card-fee">{fmt(deal.production_fee)}</div>
@@ -947,7 +1120,7 @@
               )}
               {deal.stage === 'Enquiry' && (
                 <button className={`info-toggle ${deal.info_status === 'Info Received' ? 'info-received' : 'info-awaiting'}`} onClick={toggleInfo}>
-                  {deal.info_status === 'Info Received' ? '✓ Info' : 'Awaiting info'}
+                  {deal.info_status === 'Info Received' ? 'Info received' : 'Awaiting info'}
                 </button>
               )}
             </div>
@@ -968,7 +1141,7 @@
               )}
               {deal.stage === 'Production' && (deal.production_status || []).map(s => (
                 <span key={s} style={{fontSize:9,padding:'1px 5px',borderRadius:3,background:'var(--teal-light)',color:'var(--teal)',fontWeight:500}}>
-                  {s === 'Delivered' ? '✓ Delivered' : '✓ Invoiced'}
+                  {s === 'Delivered' ? 'Delivered' : 'Invoiced'}
                 </span>
               ))}
             </div>
@@ -978,7 +1151,7 @@
     }
 
     // =====================
-    // KANBAN BOARD — filters out archived deals
+    // KANBAN BOARD
     // =====================
     function KanbanBoard({ user }) {
       const [deals, setDeals] = useState([]);
@@ -1012,24 +1185,20 @@
         load();
       }
 
-      async function handleArchive(id) {
-        await db.from('deals').update({ archived: true }).eq('id', id);
-        load();
-      }
-
-      // ── Active deals only on the kanban ──
-      const activeDeals = deals.filter(d => !d.archived);
-
       function colTotal(stage) {
-        return activeDeals.filter(d => d.stage === stage && d.production_fee).reduce((s,d) => s + parseFloat(d.production_fee||0), 0);
+        return deals.filter(d => d.stage === stage && d.production_fee).reduce((s,d) => s + parseFloat(d.production_fee||0), 0);
       }
 
       const STAGE_PIPS = {
-        'Enquiry': 'pip-enquiry', 'Quoted': 'pip-quoted', 'Pending Likely': 'pip-pending',
-        'Won': 'pip-won', 'Production': 'pip-production', 'Lost': 'pip-lost',
+        'Enquiry': 'pip-enquiry',
+        'Quoted': 'pip-quoted',
+        'Pending Likely': 'pip-pending',
+        'Won': 'pip-won',
+        'Production': 'pip-production',
+        'Lost': 'pip-lost',
       };
 
-      if (loading) return <div className="loading">Loading pipeline…</div>;
+      if (loading) return <div className="loading">Loading pipeline...</div>;
 
       return (
         <div>
@@ -1046,7 +1215,7 @@
           <div className="kanban-wrap">
             <div className="kanban-board">
               {STAGES.map(stage => {
-                const stageDeals = activeDeals.filter(d => d.stage === stage);
+                const stageDeals = deals.filter(d => d.stage === stage);
                 const total = colTotal(stage);
                 return (
                   <div key={stage} className="kanban-col">
@@ -1057,7 +1226,9 @@
                       </div>
                       <span className="col-count">{stageDeals.length}</span>
                     </div>
-                    {total > 0 && <div className="col-total">{fmt(total)}</div>}
+                    {total > 0 && (
+                      <div className="col-total">{fmt(total)}</div>
+                    )}
                     <div
                       className={`col-body ${dragOver === stage ? 'drag-over' : ''}`}
                       onDragOver={e => { e.preventDefault(); setDragOver(stage); }}
@@ -1072,7 +1243,6 @@
                           contacts={contacts}
                           onEdit={(d, refresh) => { if (refresh) { load(); return; } setEditDeal(d); setNewStage(null); }}
                           onDragStart={id => setDragId(id)}
-                          onArchive={handleArchive}
                         />
                       ))}
                       {stageDeals.length === 0 && <div className="empty">No deals</div>}
@@ -1082,120 +1252,6 @@
                 );
               })}
             </div>
-          </div>
-        </div>
-      );
-    }
-
-    // =====================
-    // ARCHIVE PAGE
-    // =====================
-    function ArchivePage() {
-      const [deals, setDeals] = useState([]);
-      const [companies, setCompanies] = useState([]);
-      const [contacts, setContacts] = useState([]);
-      const [loading, setLoading] = useState(true);
-      const [search, setSearch] = useState('');
-      const [editDeal, setEditDeal] = useState(null);
-
-      async function load() {
-        const [d, co, ct] = await Promise.all([
-          db.from('deals').select('*').eq('archived', true).order('created_at', { ascending: false }),
-          db.from('companies').select('*').order('name'),
-          db.from('contacts').select('*').order('full_name'),
-        ]);
-        setDeals(d.data || []);
-        setCompanies(co.data || []);
-        setContacts(ct.data || []);
-        setLoading(false);
-      }
-
-      useEffect(() => { load(); }, []);
-
-      async function handleRestore(id) {
-        await db.from('deals').update({ archived: false }).eq('id', id);
-        load();
-      }
-
-      const filtered = deals.filter(d => {
-        if (!search) return true;
-        const co = companies.find(c => c.id === d.company_id);
-        const q = search.toLowerCase();
-        return (
-          (d.project_name || '').toLowerCase().includes(q) ||
-          (d.project_number || '').includes(q) ||
-          (co?.name || '').toLowerCase().includes(q)
-        );
-      });
-
-      const totalFee = filtered.reduce((s,d) => s + parseFloat(d.production_fee||0), 0);
-
-      if (loading) return <div className="loading">Loading archive…</div>;
-
-      return (
-        <div className="page-wrap">
-          {editDeal && (
-            <DealModal
-              deal={editDeal}
-              companies={companies}
-              contacts={contacts}
-              onSave={() => { setEditDeal(null); load(); }}
-              onClose={() => setEditDeal(null)}
-            />
-          )}
-
-          <div style={{marginBottom:20,padding:'12px 16px',background:'var(--teal-light)',border:'1px solid var(--teal)',borderRadius:'var(--radius-sm)',fontSize:12,color:'var(--teal)'}}>
-            <strong>Archive</strong> — delivered and invoiced projects. These are removed from the active pipeline but all fees remain included in revenue dashboard figures.
-          </div>
-
-          <div style={{display:'flex',alignItems:'center',gap:10,marginBottom:16,flexWrap:'wrap'}}>
-            <div className="search-bar">
-              <span className="search-icon">⌕</span>
-              <input placeholder="Search archived deals…" value={search} onChange={e => setSearch(e.target.value)} />
-            </div>
-            <div style={{marginLeft:'auto',fontSize:13,color:'var(--text-2)'}}>
-              {filtered.length} deal{filtered.length !== 1 ? 's' : ''} · <strong style={{color:'var(--green)'}}>{fmt(totalFee)}</strong> total fees
-            </div>
-          </div>
-
-          {filtered.length === 0 && (
-            <div className="empty">
-              {deals.length === 0
-                ? 'No archived deals yet. Archive invoiced projects from the Production column on the Pipeline.'
-                : 'No deals match your search.'}
-            </div>
-          )}
-
-          <div className="archive-grid">
-            {filtered.map(deal => {
-              const company = companies.find(c => c.id === deal.company_id);
-              const contact = contacts.find(c => c.id === deal.contact_id);
-              return (
-                <div key={deal.id} className="archive-card">
-                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:8}}>
-                    <div>
-                      <div style={{fontSize:13,fontWeight:500,color:'var(--text)',marginBottom:2}}>{deal.project_name || 'Untitled'}</div>
-                      {deal.project_number && <div style={{fontSize:10,color:'var(--text-3)',fontFamily:'DM Mono'}}>#{deal.project_number}</div>}
-                    </div>
-                    <div style={{fontSize:14,fontWeight:500,color:'var(--green)',flexShrink:0,marginLeft:10}}>{fmt(deal.production_fee)}</div>
-                  </div>
-                  {company && <div style={{fontSize:12,color:'var(--text-2)',marginBottom:4}}>{company.name}{contact ? ` · ${contact.full_name}` : ''}</div>}
-                  <div style={{display:'flex',flexWrap:'wrap',gap:4,marginBottom:10}}>
-                    {(deal.project_types?.length ? deal.project_types : deal.project_type ? [deal.project_type] : []).map(t => (
-                      <span key={t} className={`type-badge ${typeBadgeClass(t)}`}>{t}</span>
-                    ))}
-                    {deal.project_stage && <span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:'var(--purple-light)',color:'var(--purple)',fontWeight:500}}>{deal.project_stage}</span>}
-                    {deal.delivery_month && <span style={{fontSize:10,padding:'2px 6px',borderRadius:4,background:'var(--grey-light)',color:'var(--text-2)'}}>{deal.delivery_month}</span>}
-                  </div>
-                  {deal.supplier_fee > 0 && <div style={{fontSize:11,color:'var(--text-3)',marginBottom:8}}>+ {fmt(deal.supplier_fee)} suppliers</div>}
-                  <div style={{display:'flex',gap:8,borderTop:'1px solid var(--border)',paddingTop:10,marginTop:4}}>
-                    <button className="btn btn-ghost btn-sm" onClick={() => setEditDeal(deal)}>View / Edit</button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => { if (window.confirm('Restore this deal to the active pipeline?')) handleRestore(deal.id); }}
-                      style={{color:'var(--teal)',borderColor:'var(--teal)'}}>↩ Restore</button>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </div>
       );
@@ -1243,7 +1299,9 @@
         const blob = new Blob([csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = `ourstudio-contacts-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+        a.href = url;
+        a.download = `ourstudio-contacts-${new Date().toISOString().slice(0,10)}.csv`;
+        a.click();
         URL.revokeObjectURL(url);
       }
 
@@ -1268,17 +1326,17 @@
           )}
           <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:20, gap:10, flexWrap:'wrap'}}>
             <div className="search-bar">
-              <span className="search-icon">⌕</span>
-              <input placeholder="Search contacts…" value={search} onChange={e => setSearch(e.target.value)} />
+              <span className="search-icon">Search</span>
+              <input placeholder="Search contacts..." value={search} onChange={e => setSearch(e.target.value)} />
             </div>
             <div style={{display:'flex',alignItems:'center',gap:8}}>
               <ViewToggle />
-              <button className="btn btn-ghost" onClick={exportCSV}>↓ Export CSV</button>
+              <button className="btn btn-ghost" onClick={exportCSV}>Export Export CSV</button>
               <button className="btn btn-primary" onClick={() => { setEditContact(null); setShowModal(true); }}>+ Add contact</button>
             </div>
           </div>
 
-          {loading ? <div className="loading">Loading contacts…</div> : viewMode === 'grid' ? (
+          {loading ? <div className="loading">Loading contacts...</div> : viewMode === 'grid' ? (
             <div className="contacts-grid">
               {filtered.map(c => (
                 <div key={c.id} className="contact-card" onClick={() => { setEditContact(c); setShowModal(true); }}>
@@ -1286,7 +1344,7 @@
                     <div className="contact-avatar">{initials(c.full_name)}</div>
                     <div>
                       <div className="contact-name">{c.full_name}</div>
-                      <div className="contact-role">{c.job_title || '—'}</div>
+                      <div className="contact-role">{c.job_title || '--'}</div>
                     </div>
                   </div>
                   {c.companies?.name && <div className="contact-company">{c.companies.name}</div>}
@@ -1315,9 +1373,9 @@
                     <div className="contact-avatar" style={{width:26,height:26,fontSize:10,flexShrink:0}}>{initials(c.full_name)}</div>
                     <span style={{fontSize:13,fontWeight:500}}>{c.full_name}</span>
                   </div>
-                  <div style={{fontSize:12,color:'var(--text-2)'}}>{c.companies?.name || '—'}</div>
-                  <div style={{fontSize:12,color:'var(--text-2)'}}>{c.job_title || '—'}</div>
-                  <div style={{fontSize:12,color:'var(--blue)'}}>{c.email || '—'}</div>
+                  <div style={{fontSize:12,color:'var(--text-2)'}}>{c.companies?.name || '--'}</div>
+                  <div style={{fontSize:12,color:'var(--text-2)'}}>{c.job_title || '--'}</div>
+                  <div style={{fontSize:12,color:'var(--blue)'}}>{c.email || '--'}</div>
                   <button className="btn btn-ghost btn-sm" onClick={() => { setEditContact(c); setShowModal(true); }}>Edit</button>
                 </div>
               ))}
@@ -1341,8 +1399,11 @@
         setSaving(true);
         const payload = {...form};
         Object.keys(payload).forEach(k => { if (payload[k] === '') payload[k] = null; });
-        if (isNew) { await db.from('contacts').insert(payload); }
-        else { await db.from('contacts').update(payload).eq('id', form.id); }
+        if (isNew) {
+          await db.from('contacts').insert(payload);
+        } else {
+          await db.from('contacts').update(payload).eq('id', form.id);
+        }
         setSaving(false);
         onSave();
       }
@@ -1351,8 +1412,8 @@
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
           <div className="modal">
             <div className="modal-header">
-              <h3>{isNew ? 'New contact' : `Edit — ${form.full_name}`}</h3>
-              <button className="modal-close" onClick={onClose}>×</button>
+              <h3>{isNew ? 'New contact' : `Edit - ${form.full_name}`}</h3>
+              <button className="modal-close" onClick={onClose}>x</button>
             </div>
             <div className="modal-body">
               <div className="form-row">
@@ -1369,7 +1430,7 @@
                 <div className="form-group">
                   <label className="form-label">Company</label>
                   <select className="form-select" value={form.company_id||''} onChange={e => set('company_id',e.target.value)}>
-                    <option value="">Select company…</option>
+                    <option value="">Select company...</option>
                     {companies.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                   </select>
                 </div>
@@ -1382,14 +1443,14 @@
                 <div className="form-group">
                   <label className="form-label">Contact type</label>
                   <select className="form-select" value={form.contact_type||''} onChange={e => set('contact_type',e.target.value)}>
-                    <option value="">Select…</option>
+                    <option value="">Select...</option>
                     {CONTACT_TYPES.map(t => <option key={t}>{t}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Source</label>
                   <select className="form-select" value={form.source||''} onChange={e => set('source',e.target.value)}>
-                    <option value="">Select…</option>
+                    <option value="">Select...</option>
                     {SOURCES.map(s => <option key={s}>{s}</option>)}
                   </select>
                 </div>
@@ -1400,12 +1461,12 @@
               </div>
               <div className="form-group">
                 <label className="form-label">Notes</label>
-                <textarea className="form-textarea" value={form.notes||''} onChange={e => set('notes',e.target.value)} placeholder="Any context about this contact…" />
+                <textarea className="form-textarea" value={form.notes||''} onChange={e => set('notes',e.target.value)} placeholder="Any context about this contact..." />
               </div>
             </div>
             <div className="modal-footer">
               <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save contact'}</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : 'Save contact'}</button>
             </div>
           </div>
         </div>
@@ -1438,7 +1499,9 @@
 
       useEffect(() => { load(); }, []);
 
-      function contactsForCompany(companyId) { return contacts.filter(c => c.company_id === companyId); }
+      function contactsForCompany(companyId) {
+        return contacts.filter(c => c.company_id === companyId);
+      }
 
       const filtered = companies.filter(c => {
         const matchSearch = c.name?.toLowerCase().includes(search.toLowerCase());
@@ -1452,11 +1515,16 @@
         return {};
       }
 
+      function chaseStyle(chase) {
+        if (chase) return { border:'1.5px solid var(--amber)', background:'var(--amber-light)' };
+        return {};
+      }
+
       function CompanyCard({ c }) {
         const expanded = expandedId === c.id;
         const coContacts = contactsForCompany(c.id);
-        const cardStyle = {};
-        if (c.needs_chase) Object.assign(cardStyle, { border:'1.5px solid var(--amber)', background:'var(--amber-light)' });
+        const cardStyle = { ...statusStyle(c.status), ...(c.needs_chase && !c.status === 'Active Client' ? chaseStyle(true) : {}) };
+        if (c.needs_chase) Object.assign(cardStyle, chaseStyle(true));
         if (c.status === 'Active Client') Object.assign(cardStyle, statusStyle('Active Client'));
 
         return (
@@ -1470,13 +1538,15 @@
                     {c.status === 'Active Client' && <span style={{fontSize:9,padding:'1px 5px',borderRadius:3,background:'var(--green)',color:'white',fontWeight:500}}>Active</span>}
                     {c.needs_chase && <span style={{fontSize:9,padding:'1px 5px',borderRadius:3,background:'var(--amber)',color:'white',fontWeight:500}}>Chase</span>}
                   </div>
-                  <div className="contact-role">{c.type || '—'}</div>
+                  <div className="contact-role">{c.type || '--'}</div>
                 </div>
               </div>
               {coContacts.length > 0 && (
-                <button onClick={e => { e.stopPropagation(); setExpandedId(expanded ? null : c.id); }}
-                  style={{fontSize:11,color:'var(--text-2)',background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:4,padding:'3px 8px',cursor:'pointer',flexShrink:0,marginTop:2,fontFamily:'inherit'}}>
-                  {coContacts.length} {coContacts.length === 1 ? 'contact' : 'contacts'} {expanded ? '▲' : '▼'}
+                <button
+                  onClick={e => { e.stopPropagation(); setExpandedId(expanded ? null : c.id); }}
+                  style={{fontSize:11,color:'var(--text-2)',background:'var(--surface2)',border:'1px solid var(--border)',borderRadius:4,padding:'3px 8px',cursor:'pointer',flexShrink:0,marginTop:2,fontFamily:'inherit'}}
+                >
+                  {coContacts.length} {coContacts.length === 1 ? 'contact' : 'contacts'} {expanded ? '^' : 'v'}
                 </button>
               )}
             </div>
@@ -1507,8 +1577,9 @@
         const rowStyle = {};
         if (c.status === 'Active Client') Object.assign(rowStyle, { borderLeft:'3px solid var(--green)', paddingLeft:10 });
         if (c.needs_chase) Object.assign(rowStyle, { borderLeft:'3px solid var(--amber)', paddingLeft:10 });
+
         return (
-          <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr 2fr auto',gap:12,alignItems:'center',padding:'10px 14px',background:'var(--surface)',borderRadius:'var(--radius-sm)',border:'1px solid var(--border)',marginBottom:6,...rowStyle}}>
+          <div style={{display:'grid', gridTemplateColumns:'2fr 1fr 1fr 2fr auto', gap:12, alignItems:'center', padding:'10px 14px', background:'var(--surface)', borderRadius:'var(--radius-sm)', border:'1px solid var(--border)', marginBottom:6, ...rowStyle}}>
             <div style={{display:'flex',alignItems:'center',gap:8}}>
               <div className="contact-avatar" style={{width:28,height:28,fontSize:11,background:'var(--amber-light)',color:'var(--amber)',flexShrink:0}}>{initials(c.name)}</div>
               <div>
@@ -1520,7 +1591,7 @@
                 <div style={{fontSize:11,color:'var(--text-2)'}}>{c.type}</div>
               </div>
             </div>
-            <div style={{fontSize:12,color:'var(--text-2)'}}>{c.region || '—'}</div>
+            <div style={{fontSize:12,color:'var(--text-2)'}}>{c.region || '--'}</div>
             <div style={{fontSize:12,color:'var(--text-2)'}}>{coContacts.length} contact{coContacts.length !== 1 ? 's' : ''}</div>
             <div style={{fontSize:11,color:'var(--text-2)'}}>
               {coContacts.slice(0,3).map(ct => ct.full_name).join(', ')}
@@ -1540,11 +1611,11 @@
               onClose={() => { setShowModal(false); setEditCo(null); }}
             />
           )}
-          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16,flexWrap:'wrap',gap:10}}>
+          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:16, flexWrap:'wrap', gap:10}}>
             <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap'}}>
               <div className="search-bar">
-                <span className="search-icon">⌕</span>
-                <input placeholder="Search companies…" value={search} onChange={e => setSearch(e.target.value)} />
+                <span className="search-icon">Search</span>
+                <input placeholder="Search companies..." value={search} onChange={e => setSearch(e.target.value)} />
               </div>
               <select className="form-select" style={{width:'auto',fontSize:12,padding:'7px 10px'}} value={filterStatus} onChange={e => setFilterStatus(e.target.value)}>
                 <option value="all">All statuses</option>
@@ -1561,6 +1632,8 @@
               <button className="btn btn-primary" onClick={() => { setEditCo(null); setShowModal(true); }}>+ Add company</button>
             </div>
           </div>
+
+          {/* Legend */}
           <div style={{display:'flex',gap:12,marginBottom:16,flexWrap:'wrap'}}>
             <div style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'var(--text-2)'}}>
               <div style={{width:10,height:10,borderRadius:2,background:'var(--green)'}}></div> Active client
@@ -1569,7 +1642,8 @@
               <div style={{width:10,height:10,borderRadius:2,background:'var(--amber)'}}></div> Needs chasing
             </div>
           </div>
-          {loading ? <div className="loading">Loading…</div> : viewMode === 'grid' ? (
+
+          {loading ? <div className="loading">Loading...</div> : viewMode === 'grid' ? (
             <div className="contacts-grid">
               {filtered.map(c => <CompanyCard key={c.id} c={c} />)}
               {filtered.length === 0 && <div className="empty" style={{gridColumn:'1/-1'}}>No companies found</div>}
@@ -1578,9 +1652,11 @@
             <div>
               {viewMode === 'list' && (
                 <div style={{display:'grid',gridTemplateColumns:'2fr 1fr 1fr 2fr auto',gap:12,padding:'6px 14px',marginBottom:4}}>
-                  {['Company','Region','Contacts','People',''].map((h,i) => (
-                    <div key={i} style={{fontSize:11,fontWeight:600,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.04em'}}>{h}</div>
-                  ))}
+                  <div style={{fontSize:11,fontWeight:600,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.04em'}}>Company</div>
+                  <div style={{fontSize:11,fontWeight:600,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.04em'}}>Region</div>
+                  <div style={{fontSize:11,fontWeight:600,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.04em'}}>Contacts</div>
+                  <div style={{fontSize:11,fontWeight:600,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.04em'}}>People</div>
+                  <div></div>
                 </div>
               )}
               {filtered.map(c => <CompanyRow key={c.id} c={c} />)}
@@ -1604,8 +1680,11 @@
         setSaving(true);
         const payload = {...form};
         Object.keys(payload).forEach(k => { if (payload[k] === '') payload[k] = null; });
-        if (isNew) { await db.from('companies').insert(payload); }
-        else { await db.from('companies').update(payload).eq('id', form.id); }
+        if (isNew) {
+          await db.from('companies').insert(payload);
+        } else {
+          await db.from('companies').update(payload).eq('id', form.id);
+        }
         setSaving(false);
         onSave();
       }
@@ -1614,8 +1693,8 @@
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
           <div className="modal">
             <div className="modal-header">
-              <h3>{isNew ? 'New company' : `Edit — ${form.name}`}</h3>
-              <button className="modal-close" onClick={onClose}>×</button>
+              <h3>{isNew ? 'New company' : `Edit - ${form.name}`}</h3>
+              <button className="modal-close" onClick={onClose}>x</button>
             </div>
             <div className="modal-body">
               <div className="form-group">
@@ -1626,14 +1705,14 @@
                 <div className="form-group">
                   <label className="form-label">Type</label>
                   <select className="form-select" value={form.type||''} onChange={e => set('type',e.target.value)}>
-                    <option value="">Select…</option>
+                    <option value="">Select...</option>
                     {COMPANY_TYPES.map(t => <option key={t}>{t}</option>)}
                   </select>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Region</label>
                   <select className="form-select" value={form.region||''} onChange={e => set('region',e.target.value)}>
-                    <option value="">Select…</option>
+                    <option value="">Select...</option>
                     {REGIONS.map(r => <option key={r}>{r}</option>)}
                   </select>
                 </div>
@@ -1647,23 +1726,23 @@
                 </div>
                 <div className="form-group">
                   <label className="form-label">Website</label>
-                  <input className="form-input" value={form.website||''} onChange={e => set('website',e.target.value)} placeholder="https://…" />
+                  <input className="form-input" value={form.website||''} onChange={e => set('website',e.target.value)} placeholder="https://..." />
                 </div>
               </div>
               <div className="form-group">
                 <label className="checkbox-item" style={{cursor:'pointer'}}>
                   <input type="checkbox" checked={form.needs_chase||false} onChange={e => set('needs_chase', e.target.checked)} style={{accentColor:'var(--amber)'}} />
-                  <span style={{fontSize:13}}>Flag for chasing <span style={{fontSize:11,color:'var(--text-2)'}}>— highlights in amber</span></span>
+                  <span style={{fontSize:13}}>Flag for chasing <span style={{fontSize:11,color:'var(--text-2)'}}>- highlights in amber</span></span>
                 </label>
               </div>
               <div className="form-group">
                 <label className="form-label">Notes</label>
-                <textarea className="form-textarea" value={form.notes||''} onChange={e => set('notes',e.target.value)} placeholder="Procurement style, relationship notes…" />
+                <textarea className="form-textarea" value={form.notes||''} onChange={e => set('notes',e.target.value)} placeholder="Procurement style, relationship notes..." />
               </div>
             </div>
             <div className="modal-footer">
               <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving…' : 'Save company'}</button>
+              <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : 'Save company'}</button>
             </div>
           </div>
         </div>
@@ -1685,10 +1764,10 @@
 
       const ENTRY_TYPES = ['Event','Meeting','Conference','BD Trip'];
       const ENTRY_COLOURS = {
-        Event:      { bg: '#E6F1FB', border: '#378ADD', text: '#042C53', pill: '#378ADD' },
-        Meeting:    { bg: '#E1F5EE', border: '#1D9E75', text: '#04342C', pill: '#1D9E75' },
+        Event: { bg: '#E6F1FB', border: '#378ADD', text: '#042C53', pill: '#378ADD' },
+        Meeting: { bg: '#E1F5EE', border: '#1D9E75', text: '#04342C', pill: '#1D9E75' },
         Conference: { bg: '#FAEEDA', border: '#BA7517', text: '#412402', pill: '#BA7517' },
-        'BD Trip':  { bg: '#EEEDFE', border: '#7F77DD', text: '#26215C', pill: '#7F77DD' },
+        'BD Trip': { bg: '#EEEDFE', border: '#7F77DD', text: '#26215C', pill: '#7F77DD' },
       };
 
       useEffect(() => {
@@ -1710,22 +1789,31 @@
       const month = currentDate.getMonth();
       const firstDay = new Date(year, month, 1);
       const lastDay = new Date(year, month + 1, 0);
-      const startPad = (firstDay.getDay() + 6) % 7;
+      const startPad = (firstDay.getDay() + 6) % 7; // Mon=0
       const daysInMonth = lastDay.getDate();
 
       function toISO(d) { return d.toISOString().slice(0,10); }
       function parseDate(s) { return s ? new Date(s + 'T00:00:00') : null; }
-      function dayStr(day) { return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`; }
+
+      function dayStr(day) {
+        return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      }
 
       function eventsForDay(day) {
         const ds = dayStr(day);
-        return events.filter(e => { const s=e.start_date, end=e.end_date||e.start_date; return ds>=s&&ds<=end; });
+        return events.filter(e => {
+          const start = e.start_date;
+          const end = e.end_date || e.start_date;
+          return ds >= start && ds <= end;
+        });
       }
+
       function isEventStart(e, day) { return e.start_date === dayStr(day); }
       function isMultiDay(e) { return e.end_date && e.end_date !== e.start_date; }
 
       const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
       const DAY_NAMES = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+
       const today = toISO(new Date());
 
       function prevMonth() { setCurrentDate(new Date(year, month - 1, 1)); }
@@ -1734,13 +1822,16 @@
       async function deleteEvent(id) {
         await db.from('diary_events').delete().eq('id', id);
         setEvents(events.filter(e => e.id !== id));
-        setShowModal(false); setEditEvent(null);
+        setShowModal(false);
+        setEditEvent(null);
       }
 
+      // Build grid cells
       const cells = [];
       for (let i = 0; i < startPad; i++) cells.push(null);
       for (let d = 1; d <= daysInMonth; d++) cells.push(d);
       while (cells.length % 7 !== 0) cells.push(null);
+
       const weeks = [];
       for (let i = 0; i < cells.length; i += 7) weeks.push(cells.slice(i, i+7));
 
@@ -1765,14 +1856,17 @@
               colours={ENTRY_COLOURS}
             />
           )}
+
+          {/* Header */}
           <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
             <div style={{display:'flex',alignItems:'center',gap:12}}>
-              <button className="btn btn-ghost btn-sm" onClick={prevMonth}>←</button>
+              <button className="btn btn-ghost btn-sm" onClick={prevMonth}><</button>
               <span style={{fontSize:16,fontWeight:500,minWidth:160,textAlign:'center'}}>{MONTH_NAMES[month]} {year}</span>
-              <button className="btn btn-ghost btn-sm" onClick={nextMonth}>→</button>
+              <button className="btn btn-ghost btn-sm" onClick={nextMonth}>></button>
               <button className="btn btn-ghost btn-sm" onClick={() => setCurrentDate(new Date())} style={{fontSize:11}}>Today</button>
             </div>
             <div style={{display:'flex',alignItems:'center',gap:12}}>
+              {/* Legend */}
               {Object.entries(ENTRY_COLOURS).map(([type, c]) => (
                 <div key={type} style={{display:'flex',alignItems:'center',gap:4,fontSize:11,color:'var(--text-2)'}}>
                   <div style={{width:10,height:10,borderRadius:2,background:c.pill}}></div>{type}
@@ -1782,12 +1876,15 @@
             </div>
           </div>
 
+          {/* Calendar grid */}
           <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',overflow:'hidden'}}>
+            {/* Day headers */}
             <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom:'1px solid var(--border)'}}>
               {DAY_NAMES.map(d => (
                 <div key={d} style={{padding:'8px 0',textAlign:'center',fontSize:11,fontWeight:600,color:'var(--text-3)',letterSpacing:'0.04em'}}>{d}</div>
               ))}
             </div>
+            {/* Weeks */}
             {weeks.map((week, wi) => (
               <div key={wi} style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',borderBottom: wi < weeks.length-1 ? '1px solid var(--border)' : 'none'}}>
                 {week.map((day, di) => {
@@ -1795,25 +1892,66 @@
                   const isToday = ds === today;
                   const dayEvents = day ? eventsForDay(day) : [];
                   return (
-                    <div key={di}
+                    <div
+                      key={di}
                       onClick={() => { if (day) { setSelectedDay(ds); setEditEvent(null); setShowModal(true); } }}
-                      style={{height:100,minHeight:100,maxHeight:100,padding:'4px 3px 3px 4px',overflow:'hidden',borderRight: di < 6 ? '1px solid var(--border)' : 'none',background: !day ? 'var(--surface2)' : 'var(--surface)',cursor: day ? 'pointer' : 'default',position:'relative',transition:'background 0.1s'}}
+                      style={{
+                        height:100,
+                        minHeight:100,
+                        maxHeight:100,
+                        padding:'4px 3px 3px 4px',
+                        overflow:'hidden',
+                        borderRight: di < 6 ? '1px solid var(--border)' : 'none',
+                        background: !day ? 'var(--surface2)' : 'var(--surface)',
+                        cursor: day ? 'pointer' : 'default',
+                        position:'relative',
+                        transition:'background 0.1s',
+                      }}
                       onMouseEnter={e => { if(day) e.currentTarget.style.background = 'var(--surface2)'; }}
                       onMouseLeave={e => { if(day) e.currentTarget.style.background = 'var(--surface)'; }}
                     >
                       {day && (
                         <>
-                          <div style={{width:22,height:22,borderRadius:'50%',background: isToday ? 'var(--text)' : 'transparent',color: isToday ? 'white' : 'var(--text-2)',fontSize:12,fontWeight: isToday ? 600 : 400,display:'flex',alignItems:'center',justifyContent:'center',marginBottom:3}}>{day}</div>
+                          <div style={{
+                            width:22,height:22,borderRadius:'50%',
+                            background: isToday ? 'var(--text)' : 'transparent',
+                            color: isToday ? 'white' : 'var(--text-2)',
+                            fontSize:12,fontWeight: isToday ? 600 : 400,
+                            display:'flex',alignItems:'center',justifyContent:'center',
+                            marginBottom:3,
+                          }}>{day}</div>
                           {dayEvents.map(e => {
                             const c = ENTRY_COLOURS[e.entry_type] || ENTRY_COLOURS['Event'];
+                            const isStart = isEventStart(e, day);
                             const multi = isMultiDay(e);
+                            const contact = contacts.find(ct => ct.id === e.contact_id);
+                            const company = companies.find(co => co.id === e.company_id);
                             const timeStr = e.start_time ? e.start_time.slice(0,5) : '';
                             return (
-                              <div key={e.id}
+                              <div
+                                key={e.id}
                                 onClick={ev => { ev.stopPropagation(); setEditEvent(e); setShowModal(true); }}
-                                style={{background:c.bg,borderLeft:'2px solid '+c.border,borderRadius:'2px',padding:'1px 4px',marginBottom:1,fontSize:9,lineHeight:'14px',color:c.text,fontWeight:500,overflow:'hidden',whiteSpace:'nowrap',textOverflow:'ellipsis',cursor:'pointer',maxWidth:'100%',boxSizing:'border-box'}}>
+                                title={e.title + (contact ? ' . ' + contact.full_name : '') + (e.location ? ' . ' + e.location : '') + (timeStr ? ' . ' + timeStr : '')}
+                                style={{
+                                  background: c.bg,
+                                  borderLeft: '2px solid ' + c.border,
+                                  borderRadius:'2px',
+                                  padding:'1px 4px',
+                                  marginBottom:1,
+                                  fontSize:9,
+                                  lineHeight:'14px',
+                                  color: c.text,
+                                  fontWeight:500,
+                                  overflow:'hidden',
+                                  whiteSpace:'nowrap',
+                                  textOverflow:'ellipsis',
+                                  cursor:'pointer',
+                                  maxWidth:'100%',
+                                  boxSizing:'border-box',
+                                }}
+                              >
                                 {timeStr && <span style={{opacity:0.7,marginRight:2}}>{timeStr}</span>}
-                                {isEventStart(e, day) || !multi ? e.title : '···'}
+                                {isStart || !multi ? e.title : '...'}
                               </div>
                             );
                           })}
@@ -1826,6 +1964,7 @@
             ))}
           </div>
 
+          {/* Upcoming list */}
           <div style={{marginTop:20}}>
             <div style={{fontSize:13,fontWeight:500,marginBottom:12,color:'var(--text-2)'}}>Upcoming this month</div>
             {events
@@ -1847,16 +1986,16 @@
                     <div style={{flex:1}}>
                       <div style={{fontSize:13,fontWeight:500}}>{e.title}</div>
                       <div style={{fontSize:11,color:'var(--text-2)'}}>
-                        {[e.start_time ? e.start_time.slice(0,5)+(e.end_time ? '–'+e.end_time.slice(0,5) : '') : null, contact?.full_name, company?.name, e.location].filter(Boolean).join(' · ')}
+                        {[e.start_time ? e.start_time.slice(0,5) + (e.end_time ? '-'+e.end_time.slice(0,5) : '') : null, contact?.full_name, company?.name, e.location].filter(Boolean).join(' . ')}
                       </div>
                     </div>
                     <span style={{fontSize:10,padding:'2px 7px',borderRadius:4,background:c.bg,color:c.text,fontWeight:500,border:'1px solid '+c.border}}>{e.entry_type}</span>
                   </div>
                 );
               })}
-            {events.filter(e => e.start_date >= dayStr(1) && e.start_date <= dayStr(daysInMonth)).length === 0 && (
-              <div className="empty">Nothing scheduled this month yet</div>
-            )}
+              {events.filter(e => e.start_date >= dayStr(1) && e.start_date <= dayStr(daysInMonth)).length === 0 && (
+                <div className="empty">Nothing scheduled this month yet</div>
+              )}
           </div>
         </div>
       );
@@ -1867,19 +2006,35 @@
     // =====================
     function DiaryModal({ event, contacts, companies, entryTypes, defaultDate, onSave, onDelete, onClose, colours }) {
       const isNew = !event?.id;
-      const [form, setForm] = useState(event || { title:'', entry_type:'Meeting', start_date:defaultDate||'', end_date:'', start_time:'', end_time:'', location:'', company_id:'', contact_id:'', notes:'' });
+      const [form, setForm] = useState(event || {
+        title: '',
+        entry_type: 'Meeting',
+        start_date: defaultDate || '',
+        end_date: '',
+        start_time: '',
+        end_time: '',
+        location: '',
+        company_id: '',
+        contact_id: '',
+        notes: '',
+      });
       const [saving, setSaving] = useState(false);
       function set(k,v) { setForm(f => ({...f,[k]:v})); }
 
-      const filteredContacts = form.company_id ? contacts.filter(c => c.company_id === form.company_id) : contacts;
+      const filteredContacts = form.company_id
+        ? contacts.filter(c => c.company_id === form.company_id)
+        : contacts;
 
       async function handleSave() {
         setSaving(true);
         const payload = {...form};
         Object.keys(payload).forEach(k => { if (payload[k] === '') payload[k] = null; });
         if (!payload.end_date) payload.end_date = payload.start_date;
-        if (isNew) { await db.from('diary_events').insert(payload); }
-        else { await db.from('diary_events').update(payload).eq('id', form.id); }
+        if (isNew) {
+          await db.from('diary_events').insert(payload);
+        } else {
+          await db.from('diary_events').update(payload).eq('id', form.id);
+        }
         setSaving(false);
         onSave();
       }
@@ -1891,9 +2046,10 @@
           <div className="modal" style={{maxWidth:480}}>
             <div className="modal-header" style={{borderLeft:'3px solid '+c.border}}>
               <h3>{isNew ? 'New diary entry' : form.title || 'Edit entry'}</h3>
-              <button className="modal-close" onClick={onClose}>×</button>
+              <button className="modal-close" onClick={onClose}>x</button>
             </div>
             <div className="modal-body">
+              {/* Entry type */}
               <div className="form-group">
                 <label className="form-label">Type</label>
                 <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
@@ -1919,13 +2075,13 @@
                   <input className="form-input" type="date" value={form.start_date||''} onChange={e => set('start_date',e.target.value)} />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">End date <span style={{fontWeight:400,color:'var(--text-3)'}}>— for multi-day</span></label>
+                  <label className="form-label">End date <span style={{fontWeight:400,color:'var(--text-3)'}}>- for multi-day</span></label>
                   <input className="form-input" type="date" value={form.end_date||''} onChange={e => set('end_date',e.target.value)} />
                 </div>
               </div>
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">Start time <span style={{fontWeight:400,color:'var(--text-3)'}}>— optional</span></label>
+                  <label className="form-label">Start time <span style={{fontWeight:400,color:'var(--text-3)'}}>- optional</span></label>
                   <input className="form-input" type="time" value={form.start_time||''} onChange={e => set('start_time',e.target.value)} />
                 </div>
                 <div className="form-group">
@@ -1969,7 +2125,7 @@
     }
 
     // =====================
-    // DASHBOARD — includes archived deals in all revenue figures
+    // DASHBOARD
     // =====================
     function DashboardPage() {
       const [deals, setDeals] = useState([]);
@@ -1980,7 +2136,6 @@
       useEffect(() => {
         async function load() {
           const [d, t] = await Promise.all([
-            // Fetch ALL deals — including archived — so revenue figures are complete
             db.from('deals').select('*'),
             db.from('targets').select('*').order('month_label'),
           ]);
@@ -1999,16 +2154,17 @@
         return MONTH_ORDER.indexOf(parts[0]) + (parseInt(parts[1] || '0') * 12);
       }
 
-      // ── EXTENDED: reads fee_month_1..5 ──
       function revenueByMonth() {
         const map = {};
         deals.forEach(d => {
           if (!['Won','Production','Lost'].includes(d.stage)) return;
           const fee = parseFloat(d.production_fee || 0);
           if (!fee) return;
-          const alloc = [1,2,3,4,5]
-            .map(i => ({ label: d[`fee_month_${i}_label`], amount: parseFloat(d[`fee_month_${i}_amount`] || 0) }))
-            .filter(a => a.label && a.amount > 0);
+          const alloc = [
+            { label: d.fee_month_1_label, amount: parseFloat(d.fee_month_1_amount || 0) },
+            { label: d.fee_month_2_label, amount: parseFloat(d.fee_month_2_amount || 0) },
+            { label: d.fee_month_3_label, amount: parseFloat(d.fee_month_3_amount || 0) },
+          ].filter(a => a.label && a.amount > 0);
           if (alloc.length > 0) {
             alloc.forEach(a => { map[a.label] = (map[a.label] || 0) + a.amount; });
           } else {
@@ -2022,7 +2178,6 @@
       function pipelineByMonth() {
         const map = {};
         deals.forEach(d => {
-          if (d.archived) return; // archived don't count as active pipeline
           if (!['Quoted','Pending Likely'].includes(d.stage)) return;
           const fee = parseFloat(d.production_fee || 0);
           const month = d.delivery_month || d.start_month;
@@ -2059,13 +2214,11 @@
       const chartData = view === 'monthly' ? monthlyData : quarterlyData;
       const maxVal = Math.max(...chartData.map(d => Math.max(d.target, d.revenue + d.pipeline, 10000)));
 
-      // Active pipeline (non-archived)
-      const wonDeals = deals.filter(d => ['Won','Production'].includes(d.stage) && !d.archived);
+      const wonDeals = deals.filter(d => ['Won','Production'].includes(d.stage));
       const totalWon = wonDeals.reduce((s,d) => s + parseFloat(d.production_fee||0), 0);
-      const quotedDeals = deals.filter(d => ['Quoted','Pending Likely'].includes(d.stage) && !d.archived);
+      const quotedDeals = deals.filter(d => ['Quoted','Pending Likely'].includes(d.stage));
       const totalPipeline = quotedDeals.reduce((s,d) => s + parseFloat(d.production_fee||0), 0);
       const lostDeals = deals.filter(d => d.stage === 'Lost');
-      const archivedDeals = deals.filter(d => d.archived);
 
       const now = new Date();
       const thisMonth = MONTH_ORDER[now.getMonth()] + ' ' + now.getFullYear();
@@ -2091,9 +2244,9 @@
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:10,marginBottom:24}}>
             {[
               { label: 'This month', value: fmt(thisMonthRev), sub: 'of ' + fmt(thisMonthTarget) + ' target', color: thisMonthRev >= thisMonthTarget ? 'var(--green)' : 'var(--text)' },
-              { label: 'Won & in production', value: fmt(totalWon), sub: wonDeals.length + ' active projects', color: 'var(--green)' },
+              { label: 'Won & in production', value: fmt(totalWon), sub: wonDeals.length + ' projects', color: 'var(--green)' },
               { label: 'Pipeline (quoted)', value: fmt(totalPipeline), sub: quotedDeals.length + ' projects', color: 'var(--blue)' },
-              { label: 'Archived projects', value: archivedDeals.length, sub: fmt(archivedDeals.reduce((s,d)=>s+parseFloat(d.production_fee||0),0)) + ' delivered', color: 'var(--teal)' },
+              { label: 'Total deals', value: deals.length, sub: lostDeals.length + ' lost', color: 'var(--text)' },
             ].map(card => (
               <div key={card.label} style={{background:'var(--surface2)',borderRadius:'var(--radius-md)',padding:'14px 16px'}}>
                 <div style={{fontSize:11,color:'var(--text-2)',marginBottom:4,fontWeight:500}}>{card.label}</div>
@@ -2105,20 +2258,19 @@
 
           <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'16px 20px',marginBottom:16}}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'baseline',marginBottom:8}}>
-              <span style={{fontSize:13,fontWeight:500}}>{thisMonth} — progress to target</span>
+              <span style={{fontSize:13,fontWeight:500}}>{thisMonth} - progress to target</span>
               <span style={{fontSize:13,color:'var(--text-2)',fontVariantNumeric:'tabular-nums'}}>{fmt(thisMonthRev)} / {fmt(thisMonthTarget)}</span>
             </div>
             <div style={{height:8,background:'var(--surface2)',borderRadius:4,overflow:'hidden'}}>
-              <div style={{height:'100%',width:thisMonthPct+'%',background: thisMonthPct >= 100 ? 'var(--green)' : thisMonthPct >= 60 ? 'var(--blue)' : 'var(--amber)',borderRadius:4}}></div>
+              <div style={{height:'100%',width:thisMonthPct + '%',background: thisMonthPct >= 100 ? 'var(--green)' : thisMonthPct >= 60 ? 'var(--blue)' : 'var(--amber)',borderRadius:4}}></div>
             </div>
-            <div style={{fontSize:11,color:'var(--text-3)',marginTop:6}}>{thisMonthPct}% of target — {fmt(Math.max(thisMonthTarget - thisMonthRev, 0))} still needed</div>
+            <div style={{fontSize:11,color:'var(--text-3)',marginTop:6}}>{thisMonthPct}% of target - {fmt(Math.max(thisMonthTarget - thisMonthRev, 0))} still needed</div>
           </div>
 
           <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'20px',marginBottom:16}}>
             <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20}}>
               <div>
                 <div style={{fontSize:14,fontWeight:500}}>Revenue vs target {year}</div>
-                <div style={{fontSize:11,color:'var(--text-3)',marginTop:2}}>Includes archived projects — all delivered fees counted</div>
                 <div style={{display:'flex',gap:14,marginTop:6}}>
                   {[{color:'var(--green)',label:'Won / in production'},{color:'#B5D4F4',label:'Pipeline'},{color:'var(--red)',label:'Target'}].map(l => (
                     <div key={l.label} style={{display:'flex',alignItems:'center',gap:5,fontSize:11,color:'var(--text-2)'}}>
@@ -2201,7 +2353,7 @@
     }
 
     // =====================
-    // APP SHELL — Archive added to nav
+    // APP SHELL
     // =====================
     function App() {
       const [session, setSession] = useState(null);
@@ -2217,25 +2369,21 @@
         return () => subscription.unsubscribe();
       }, []);
 
-      if (loading) return <div className="loading">Loading…</div>;
+      if (loading) return <div className="loading">Loading...</div>;
       if (!session) return <AuthScreen onAuth={setSession} />;
 
       const userEmail = session.user.email;
       const userName = userEmail.split('@')[0];
 
       const NAV = [
-        { id: 'dashboard', label: 'Dashboard', icon: '◈' },
-        { id: 'pipeline',  label: 'Pipeline',  icon: '⬛' },
-        { id: 'archive',   label: 'Archive',   icon: '⊠' },
-        { id: 'diary',     label: 'Diary',     icon: '◻' },
-        { id: 'contacts',  label: 'Contacts',  icon: '◎' },
-        { id: 'companies', label: 'Companies', icon: '⬡' },
+        { id: 'dashboard', label: 'Dashboard', icon: '[D]' },
+        { id: 'pipeline', label: 'Pipeline', icon: '[P]' },
+        { id: 'diary', label: 'Diary', icon: '[C]' },
+        { id: 'contacts', label: 'Contacts', icon: '[C]' },
+        { id: 'companies', label: 'Companies', icon: '[Co]' },
       ];
 
-      const PAGE_TITLES = {
-        dashboard: 'Dashboard', pipeline: 'Pipeline', archive: 'Archive',
-        diary: 'Diary', contacts: 'Contacts', companies: 'Companies',
-      };
+      const PAGE_TITLES = { dashboard: 'Dashboard', pipeline: 'Pipeline', diary: 'Diary', contacts: 'Contacts', companies: 'Companies' };
 
       return (
         <div className="app">
@@ -2265,10 +2413,9 @@
               </div>
             </div>
             {page === 'dashboard' && <DashboardPage />}
-            {page === 'pipeline'  && <KanbanBoard user={session.user} />}
-            {page === 'archive'   && <ArchivePage />}
-            {page === 'diary'     && <DiaryPage />}
-            {page === 'contacts'  && <ContactsPage />}
+            {page === 'diary' && <DiaryPage />}
+            {page === 'pipeline' && <KanbanBoard user={session.user} />}
+            {page === 'contacts' && <ContactsPage />}
             {page === 'companies' && <CompaniesPage />}
           </main>
         </div>
