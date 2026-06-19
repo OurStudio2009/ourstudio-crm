@@ -777,6 +777,10 @@
         fee_month_2_amount: '',
         fee_month_3_label: '',
         fee_month_3_amount: '',
+        fee_month_4_label: '',
+        fee_month_4_amount: '',
+        fee_month_5_label: '',
+        fee_month_5_amount: '',
         start_month: '',
         delivery_month: '',
         start_date: '',
@@ -796,7 +800,7 @@
         set('lost_reason', cur.includes(r) ? cur.filter(x => x !== r) : [...cur, r]);
       }
 
-      const allocTotal = [form.fee_month_1_amount, form.fee_month_2_amount, form.fee_month_3_amount]
+      const allocTotal = [form.fee_month_1_amount, form.fee_month_2_amount, form.fee_month_3_amount, form.fee_month_4_amount, form.fee_month_5_amount]
         .reduce((s, v) => s + (parseFloat(v) || 0), 0);
 
       async function handleSave() {
@@ -971,7 +975,7 @@
                   </div>
                   <div className="fee-alloc">
                     <div className="fee-alloc-title">Split production fee across months</div>
-                    {[1,2,3].map(i => (
+                    {[1,2,3,4,5].map(i => (
                       <div key={i} className="fee-alloc-row">
                         <select className="form-select" value={form[`fee_month_${i}_label`] || ''} onChange={e => set(`fee_month_${i}_label`, e.target.value)}>
                           <option value="">Month {i}...</option>
@@ -1165,7 +1169,7 @@
 
       async function load() {
         const [d, co, ct] = await Promise.all([
-          db.from('deals').select('*').order('created_at', { ascending: false }),
+          db.from('deals').select('*').eq('archived', false).order('created_at', { ascending: false }),
           db.from('companies').select('*').order('name'),
           db.from('contacts').select('*').order('full_name'),
         ]);
@@ -2164,6 +2168,8 @@
             { label: d.fee_month_1_label, amount: parseFloat(d.fee_month_1_amount || 0) },
             { label: d.fee_month_2_label, amount: parseFloat(d.fee_month_2_amount || 0) },
             { label: d.fee_month_3_label, amount: parseFloat(d.fee_month_3_amount || 0) },
+            { label: d.fee_month_4_label, amount: parseFloat(d.fee_month_4_amount || 0) },
+            { label: d.fee_month_5_label, amount: parseFloat(d.fee_month_5_amount || 0) },
           ].filter(a => a.label && a.amount > 0);
           if (alloc.length > 0) {
             alloc.forEach(a => { map[a.label] = (map[a.label] || 0) + a.amount; });
@@ -2353,6 +2359,87 @@
     }
 
     // =====================
+    // ARCHIVE PAGE
+    // =====================
+    function ArchivePage() {
+      const [deals, setDeals] = useState([]);
+      const [companies, setCompanies] = useState([]);
+      const [contacts, setContacts] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [search, setSearch] = useState('');
+
+      async function load() {
+        const [d, co, ct] = await Promise.all([
+          db.from('deals').select('*').eq('archived', true).order('updated_at', { ascending: false }),
+          db.from('companies').select('*'),
+          db.from('contacts').select('*'),
+        ]);
+        setDeals(d.data || []);
+        setCompanies(co.data || []);
+        setContacts(ct.data || []);
+        setLoading(false);
+      }
+
+      useEffect(() => { load(); }, []);
+
+      async function restore(id) {
+        await db.from('deals').update({ archived: false, production_status: [] }).eq('id', id);
+        load();
+      }
+
+      const filtered = deals.filter(d =>
+        d.project_name ? d.project_name.toLowerCase().includes(search.toLowerCase()) : true
+      );
+
+      const totalFees = filtered.reduce((s, d) => s + parseFloat(d.production_fee || 0), 0);
+
+      return (
+        <div className="page-wrap">
+          <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:20,gap:10}}>
+            <div className="search-bar">
+              <span className="search-icon">Search</span>
+              <input placeholder="Search archived projects..." value={search} onChange={e => setSearch(e.target.value)} />
+            </div>
+            <div style={{fontSize:13,color:'var(--text-2)'}}>
+              {filtered.length} projects | Total fees: <strong style={{color:'var(--text)'}}>{fmt(totalFees)}</strong>
+            </div>
+          </div>
+
+          {loading ? <div className="loading">Loading archive...</div> : filtered.length === 0 ? (
+            <div className="empty" style={{marginTop:40}}>No archived projects yet. Projects appear here once delivered and invoiced.</div>
+          ) : (
+            <div>
+              <div style={{display:'grid',gridTemplateColumns:'auto 2fr 1.5fr 1fr 1fr auto',gap:12,padding:'6px 14px',marginBottom:4}}>
+                {['#','Project','Client','Fee','Delivered',''].map((h,i) => (
+                  <div key={i} style={{fontSize:11,fontWeight:600,color:'var(--text-3)',textTransform:'uppercase',letterSpacing:'0.04em'}}>{h}</div>
+                ))}
+              </div>
+              {filtered.map(deal => {
+                const company = companies.find(c => c.id === deal.company_id);
+                const types = deal.project_types && deal.project_types.length ? deal.project_types : deal.project_type ? [deal.project_type] : [];
+                return (
+                  <div key={deal.id} style={{display:'grid',gridTemplateColumns:'auto 2fr 1.5fr 1fr 1fr auto',gap:12,alignItems:'center',padding:'10px 14px',background:'var(--surface)',borderRadius:'var(--radius-sm)',border:'1px solid var(--border)',marginBottom:5,borderLeft:'3px solid var(--teal)'}}>
+                    <div style={{fontSize:11,color:'var(--text-3)',fontFamily:'DM Mono, monospace'}}>#{deal.project_number}</div>
+                    <div>
+                      <div style={{fontSize:13,fontWeight:500}}>{deal.project_name}</div>
+                      <div style={{display:'flex',gap:4,marginTop:3}}>
+                        {types.map(t => <span key={t} className={`type-badge ${typeBadgeClass(t)}`}>{t}</span>)}
+                      </div>
+                    </div>
+                    <div style={{fontSize:12,color:'var(--text-2)'}}>{company ? company.name : '--'}</div>
+                    <div style={{fontSize:13,fontWeight:500,fontVariantNumeric:'tabular-nums'}}>{fmt(deal.production_fee)}</div>
+                    <div style={{fontSize:12,color:'var(--text-2)'}}>{deal.delivery_month || deal.delivery_date || '--'}</div>
+                    <button className="btn btn-ghost btn-sm" onClick={() => restore(deal.id)}>Restore</button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // =====================
     // APP SHELL
     // =====================
     function App() {
@@ -2379,11 +2466,12 @@
         { id: 'dashboard', label: 'Dashboard', icon: '[D]' },
         { id: 'pipeline', label: 'Pipeline', icon: '[P]' },
         { id: 'diary', label: 'Diary', icon: '[C]' },
+        { id: 'archive', label: 'Archive', icon: '[A]' },
         { id: 'contacts', label: 'Contacts', icon: '[C]' },
         { id: 'companies', label: 'Companies', icon: '[Co]' },
       ];
 
-      const PAGE_TITLES = { dashboard: 'Dashboard', pipeline: 'Pipeline', diary: 'Diary', contacts: 'Contacts', companies: 'Companies' };
+      const PAGE_TITLES = { dashboard: 'Dashboard', pipeline: 'Pipeline', diary: 'Diary', archive: 'Archive', contacts: 'Contacts', companies: 'Companies' };
 
       return (
         <div className="app">
@@ -2414,6 +2502,7 @@
             </div>
             {page === 'dashboard' && <DashboardPage />}
             {page === 'diary' && <DiaryPage />}
+            {page === 'archive' && <ArchivePage />}
             {page === 'pipeline' && <KanbanBoard user={session.user} />}
             {page === 'contacts' && <ContactsPage />}
             {page === 'companies' && <CompaniesPage />}
