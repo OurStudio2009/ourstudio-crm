@@ -1287,7 +1287,7 @@
 
       async function load() {
         const [ct, co] = await Promise.all([
-          db.from('contacts').select('*, companies(name)').order('full_name'),
+          db.from('contacts').select('*, companies(name, type, region)').order('full_name'),
           db.from('companies').select('*').order('name'),
         ]);
         setContacts(ct.data || []);
@@ -1304,12 +1304,21 @@
       );
 
       function exportCSV() {
-        const rows = [['First Name','Last Name','Email','Company','Job Title','Contact Type','Source']];
+        const rows = [['First Name','Last Name','Email','Company','Company Type','Job Title','City','Contact Type','Source','Tags']];
         filtered.forEach(c => {
           const parts = (c.full_name || '').trim().split(' ');
           const first = parts[0] || '';
           const last = parts.slice(1).join(' ') || '';
-          rows.push([first, last, c.email || '', c.companies ? c.companies.name : '', c.job_title || '', c.contact_type || '', c.source || '']);
+          rows.push([
+            first, last, c.email || '',
+            c.companies ? c.companies.name : '',
+            c.companies ? c.companies.type || '' : '',
+            c.job_title || '',
+            c.city || '',
+            c.contact_type || '',
+            c.source || '',
+            c.tags ? c.tags.join('; ') : ''
+          ]);
         });
         const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
         const blob = new Blob([csv], { type: 'text/csv' });
@@ -1363,7 +1372,15 @@
                       <div className="contact-role">{c.job_title || '--'}</div>
                     </div>
                   </div>
-                  {c.companies && c.companies.name && <div className="contact-company">{c.companies.name}</div>}
+                  {c.companies && c.companies.name && (
+                    <div style={{marginBottom:8}}>
+                      <div className="contact-company" style={{marginBottom:4}}>{c.companies.name}</div>
+                      {c.companies.type && (
+                        <span style={{fontSize:10,padding:'2px 7px',borderRadius:4,background:'var(--amber-light)',color:'var(--amber)',fontWeight:500}}>{c.companies.type}</span>
+                      )}
+                    </div>
+                  )}
+                  {c.city && <div style={{fontSize:11,color:'var(--text-2)',marginBottom:2}}>{c.city}</div>}
                   {c.email && <div style={{fontSize:12,color:'var(--blue)',marginBottom:4}}>{c.email}</div>}
                   <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginTop:8}}>
                     {c.source && <span className="source-badge">{c.source}</span>}
@@ -1389,8 +1406,11 @@
                     <div className="contact-avatar" style={{width:26,height:26,fontSize:10,flexShrink:0}}>{initials(c.full_name)}</div>
                     <span style={{fontSize:13,fontWeight:500}}>{c.full_name}</span>
                   </div>
-                  <div style={{fontSize:12,color:'var(--text-2)'}}>{c.companies ? c.companies.name : '--'}</div>
-                  <div style={{fontSize:12,color:'var(--text-2)'}}>{c.job_title || '--'}</div>
+                  <div style={{fontSize:12,color:'var(--text-2)'}}>
+                    {c.companies ? c.companies.name : '--'}
+                    {c.companies && c.companies.type && <span style={{fontSize:10,padding:'1px 6px',borderRadius:3,background:'var(--amber-light)',color:'var(--amber)',fontWeight:500,marginLeft:6}}>{c.companies.type}</span>}
+                  </div>
+                  <div style={{fontSize:12,color:'var(--text-2)'}}>{c.job_title || '--'}{c.city ? ', ' + c.city : ''}</div>
                   <div style={{fontSize:12,color:'var(--blue)'}}>{c.email || '--'}</div>
                   <button className="btn btn-ghost btn-sm" onClick={() => { setEditContact(c); setShowModal(true); }}>Edit</button>
                 </div>
@@ -1407,7 +1427,7 @@
     // =====================
     function ContactModal({ contact, companies, onSave, onClose }) {
       const isNew = !(contact && contact.id);
-      const [form, setForm] = useState(contact || { full_name:'', job_title:'', company_id:'', email:'', contact_type:'Prospect', source:'', tags:[], notes:'' });
+      const [form, setForm] = useState(contact || { full_name:'', job_title:'', company_id:'', email:'', contact_type:'Prospect', source:'', city:'', tags:[], notes:'' });
       const [saving, setSaving] = useState(false);
       function set(k,v) { setForm(f => ({...f,[k]:v})); }
 
