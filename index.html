@@ -2231,7 +2231,7 @@
       const monthlyData = targets.map(t => ({
         label: t.month_label,
         short: t.month_label.split(' ')[0].slice(0,3) + "'" + t.month_label.split(' ')[1].slice(2),
-        target: parseFloat(t.target_amount || 50000),
+        target: 35000,
         revenue: Math.round(revMap[t.month_label] || 0),
         pipeline: Math.round(pipMap[t.month_label] || 0),
       })).sort((a,b) => monthIndex(a.label) - monthIndex(b.label));
@@ -2255,13 +2255,14 @@
 
       const wonDeals = deals.filter(d => ['Won','Production'].includes(d.stage));
       const totalWon = wonDeals.reduce((s,d) => s + parseFloat(d.production_fee||0), 0);
+      const totalSupplier = wonDeals.reduce((s,d) => s + parseFloat(d.supplier_fee||0), 0);
       const quotedDeals = deals.filter(d => ['Quoted','Pending Likely'].includes(d.stage));
       const totalPipeline = quotedDeals.reduce((s,d) => s + parseFloat(d.production_fee||0), 0);
       const lostDeals = deals.filter(d => d.stage === 'Lost');
 
       const now = new Date();
       const thisMonth = MONTH_ORDER[now.getMonth()] + ' ' + now.getFullYear();
-      const thisMonthTarget = parseFloat((targets.find(t => t.month_label === thisMonth) || {target_amount: 50000}).target_amount);
+      const thisMonthTarget = parseFloat((targets.find(t => t.month_label === thisMonth) || {target_amount: 35000}).target_amount);
       const thisMonthRev = revMap[thisMonth] || 0;
       const thisMonthPct = Math.min(Math.round((thisMonthRev / thisMonthTarget) * 100), 100);
 
@@ -2283,7 +2284,7 @@
           <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:10,marginBottom:24}}>
             {[
               { label: 'This month', value: fmt(thisMonthRev), sub: 'of ' + fmt(thisMonthTarget) + ' target', color: thisMonthRev >= thisMonthTarget ? 'var(--green)' : 'var(--text)' },
-              { label: 'Won & in production', value: fmt(totalWon), sub: wonDeals.length + ' projects', color: 'var(--green)' },
+              { label: 'Won & in production', value: fmt(totalWon), sub: wonDeals.length + ' projects' + (totalSupplier > 0 ? ' + ' + fmt(totalSupplier) + ' supplier' : ''), color: 'var(--green)' },
               { label: 'Pipeline (quoted)', value: fmt(totalPipeline), sub: quotedDeals.length + ' projects', color: 'var(--blue)' },
               { label: 'Total deals', value: deals.length, sub: lostDeals.length + ' lost', color: 'var(--text)' },
             ].map(card => (
@@ -2303,7 +2304,7 @@
             <div style={{height:8,background:'var(--surface2)',borderRadius:4,overflow:'hidden'}}>
               <div style={{height:'100%',width:thisMonthPct + '%',background: thisMonthPct >= 100 ? 'var(--green)' : thisMonthPct >= 60 ? 'var(--blue)' : 'var(--amber)',borderRadius:4}}></div>
             </div>
-            <div style={{fontSize:11,color:'var(--text-3)',marginTop:6}}>{thisMonthPct}% of target - {fmt(Math.max(thisMonthTarget - thisMonthRev, 0))} still needed</div>
+            <div style={{fontSize:11,color:'var(--text-3)',marginTop:6}}>{thisMonthPct}% of target - {fmt(Math.max(thisMonthTarget - thisMonthRev, 0))} still needed (OS production fees only, excl. supplier costs)</div>
           </div>
 
           <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'20px',marginBottom:16}}>
