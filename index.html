@@ -1184,7 +1184,7 @@
 
       async function load() {
         const [d, co, ct] = await Promise.all([
-          db.from('deals').select('*').eq('archived', false).order('created_at', { ascending: false }),
+          db.from('deals').select('*').eq('archived', false).neq('stage', 'Lost').order('created_at', { ascending: false }),
           db.from('companies').select('*').order('name'),
           db.from('contacts').select('*').order('full_name'),
         ]);
@@ -1233,7 +1233,7 @@
           )}
           <div className="kanban-wrap">
             <div className="kanban-board">
-              {STAGES.map(stage => {
+              {STAGES.filter(stage => stage !== 'Lost').map(stage => {
                 const stageDeals = deals.filter(d => d.stage === stage);
                 const total = colTotal(stage);
                 return (
@@ -2251,7 +2251,7 @@
       });
 
       const chartData = view === 'monthly' ? monthlyData : quarterlyData;
-      const maxVal = Math.max(...chartData.map(d => Math.max(d.target, d.revenue + d.pipeline, 10000)));
+      const maxVal = Math.max(...chartData.map(d => Math.max(d.revenue, 10000)), 35000) * 1.1;
 
       const wonDeals = deals.filter(d => ['Won','Production'].includes(d.stage));
       const totalWon = wonDeals.reduce((s,d) => s + parseFloat(d.production_fee||0), 0);
@@ -2326,7 +2326,7 @@
             </div>
 
             <div style={{display:'flex',gap: view==='monthly' ? 4 : 24,alignItems:'flex-end',height:BAR_H+30,paddingBottom:24,position:'relative'}}>
-              <div style={{position:'absolute',left:0,right:0,bottom:24+Math.round(((view==='monthly'?35000:105000)/maxVal)*BAR_H),borderTop:'1.5px dashed #E24B4A',opacity:0.5,pointerEvents:'none'}}></div>
+              <div style={{position:'absolute',left:0,right:0,bottom:24+Math.round(((view==='monthly'?35000:105000)/maxVal)*BAR_H),borderTop:'2px dashed #E24B4A',opacity:0.8,pointerEvents:'none'}}><span style={{position:'absolute',right:4,top:-16,fontSize:9,color:'#E24B4A',fontWeight:600,background:'white',padding:'0 3px'}}>{view==='monthly'?'£35k target':'£105k target'}</span></div>
               {chartData.map(d => {
                 const revH = Math.max(Math.round((d.revenue/maxVal)*BAR_H), d.revenue > 0 ? 3 : 0);
                 const pipH = Math.max(Math.round((d.pipeline/maxVal)*BAR_H), d.pipeline > 0 ? 3 : 0);
