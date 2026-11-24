@@ -2286,6 +2286,8 @@
       });
 
       const BAR_H = 180;
+      // distance from the bottom of the chart area to the bars' baseline: 24px padding + 3px gap + 14px month label
+      const BAR_BASE = 24 + 3 + 14;
 
       if (loading) return <div className="loading">Loading dashboard...</div>;
 
@@ -2335,18 +2337,17 @@
               </div>
             </div>
 
-            <div style={{display:'flex',gap: view==='monthly' ? 4 : 24,alignItems:'flex-end',height:BAR_H+30,paddingBottom:24,position:'relative'}}>
-              <div style={{position:'absolute',left:0,right:0,bottom:24+Math.round(((view==='monthly'?35000:105000)/maxVal)*BAR_H),borderTop:'2px dashed #E24B4A',opacity:0.8,pointerEvents:'none'}}><span style={{position:'absolute',right:4,top:-16,fontSize:9,color:'#E24B4A',fontWeight:600,background:'white',padding:'0 3px'}}>{view==='monthly'?'£35k target':'£105k target'}</span></div>
+            <div style={{display:'flex',gap: view==='monthly' ? 4 : 24,alignItems:'flex-end',height:BAR_H+60,paddingBottom:24,position:'relative'}}>
+              <div style={{position:'absolute',left:0,right:0,bottom:BAR_BASE+Math.round(((view==='monthly'?35000:105000)/maxVal)*BAR_H),borderTop:'2px dashed #E24B4A',opacity:0.8,pointerEvents:'none'}}><span style={{position:'absolute',right:4,top:-16,fontSize:9,color:'#E24B4A',fontWeight:600,background:'white',padding:'0 3px'}}>{view==='monthly'?'£35k target':'£105k target'}</span></div>
               {chartData.map(d => {
                 const revH = Math.max(Math.round((d.revenue/maxVal)*BAR_H), d.revenue > 0 ? 3 : 0);
                 const pipH = Math.max(Math.round((d.pipeline/maxVal)*BAR_H), d.pipeline > 0 ? 3 : 0);
                 const isNow = view === 'monthly' && d.label === thisMonth;
                 const hasValue = d.revenue > 0 || d.pipeline > 0;
-                const totalH = revH + pipH;
                 return (
                   <div key={d.label} style={{display:'flex',flexDirection:'column',alignItems:'center',gap:3,flex: view==='monthly' ? 1 : '0 0 90px',minWidth: view==='monthly' ? 12 : 90,position:'relative'}}>
                     {hasValue && (
-                      <div style={{position:'absolute',bottom: 24 + totalH + 4,fontSize: view==='monthly' ? 8 : 10,color: isNow ? 'var(--text)' : 'var(--text-2)',fontWeight:500,textAlign:'center',whiteSpace:'nowrap',fontVariantNumeric:'tabular-nums',pointerEvents:'none'}}>
+                      <div style={{position:'absolute',bottom: BAR_BASE + Math.max(revH,pipH) + 4,fontSize: view==='monthly' ? 8 : 10,color: isNow ? 'var(--text)' : 'var(--text-2)',fontWeight:500,textAlign:'center',whiteSpace:'nowrap',fontVariantNumeric:'tabular-nums',pointerEvents:'none'}}>
                         {d.revenue > 0 && <div style={{color:'var(--green)'}}>{fmt(d.revenue)}</div>}
                         {d.pipeline > 0 && <div style={{color:'var(--blue)'}}>+{fmt(d.pipeline)}</div>}
                       </div>
@@ -2355,7 +2356,7 @@
                       <div style={{width: view==='monthly' ? '45%' : 34,minWidth:4,height:Math.max(revH,1),background:'var(--green)',borderRadius:'2px 2px 0 0',opacity: isNow ? 1 : 0.8}}></div>
                       <div style={{width: view==='monthly' ? '45%' : 34,minWidth:4,height:Math.max(pipH,pipH>0?2:0),background:'#B5D4F4',border: pipH>0 ? '1px solid #378ADD' : 'none',borderRadius:'2px 2px 0 0'}}></div>
                     </div>
-                    <div style={{fontSize: view==='monthly' ? 9 : 11,color: isNow ? 'var(--text)' : 'var(--text-3)',fontWeight: isNow ? 600 : 400,textAlign:'center'}}>{view==='monthly' ? d.short : d.label}</div>
+                    <div style={{height:14,lineHeight:'14px',fontSize: view==='monthly' ? 9 : 11,color: isNow ? 'var(--text)' : 'var(--text-3)',fontWeight: isNow ? 600 : 400,textAlign:'center'}}>{view==='monthly' ? d.short : d.label}</div>
                   </div>
                 );
               })}
@@ -2586,6 +2587,173 @@
       );
     }
 
+
+    // =====================
+    // INSIGHTS
+    // =====================
+    function RateTable({ title, note, rows }) {
+      return (
+        <div style={{background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'16px 20px'}}>
+          <div style={{fontSize:13,fontWeight:500,marginBottom:2}}>{title}</div>
+          {note && <div style={{fontSize:11,color:'var(--text-3)',marginBottom:12}}>{note}</div>}
+          {rows.length === 0 ? (
+            <div style={{fontSize:12,color:'var(--text-3)',marginTop:10}}>Nothing decided yet</div>
+          ) : rows.map(r => {
+            const pct = r.decided ? Math.round((r.won / r.decided) * 100) : 0;
+            return (
+              <div key={r.label} style={{display:'flex',alignItems:'center',gap:10,marginBottom:8,marginTop: note ? 0 : 10}}>
+                <div style={{flex:1,fontSize:12,color:'var(--text-2)'}}>{r.label}</div>
+                <div style={{width:80,height:6,background:'var(--surface2)',borderRadius:3,overflow:'hidden'}}>
+                  <div style={{height:'100%',width:pct + '%',background:'var(--green)',borderRadius:3}}></div>
+                </div>
+                <div style={{fontSize:12,fontWeight:500,minWidth:36,textAlign:'right'}}>{pct}%</div>
+                <div style={{fontSize:11,color:'var(--text-3)',minWidth:48,textAlign:'right'}}>{r.won}/{r.decided}</div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    function InsightsPage() {
+      const [deals, setDeals] = useState([]);
+      const [companies, setCompanies] = useState([]);
+      const [contacts, setContacts] = useState([]);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        async function load() {
+          const [d, co, ct] = await Promise.all([
+            db.from('deals').select('*'),
+            db.from('companies').select('id, name, type'),
+            db.from('contacts').select('id, source'),
+          ]);
+          setDeals(d.data || []);
+          setCompanies(co.data || []);
+          setContacts(ct.data || []);
+          setLoading(false);
+        }
+        load();
+      }, []);
+
+      if (loading) return <div className="loading">Loading insights...</div>;
+
+      const WON = ['Won','Production'];
+      const decided = deals.filter(d => [...WON, 'Lost'].includes(d.stage));
+      const won = decided.filter(d => WON.includes(d.stage));
+      const fee = d => parseFloat(d.production_fee || 0);
+      const sup = d => parseFloat(d.supplier_fee || 0);
+      const companyById = Object.fromEntries(companies.map(c => [c.id, c]));
+      const contactById = Object.fromEntries(contacts.map(c => [c.id, c]));
+
+      function rateRows(keyFn) {
+        const m = {};
+        decided.forEach(d => {
+          const k = keyFn(d) || 'Not recorded';
+          if (!m[k]) m[k] = { label: k, won: 0, decided: 0 };
+          m[k].decided += 1;
+          if (WON.includes(d.stage)) m[k].won += 1;
+        });
+        return Object.values(m).sort((a, b) => b.decided - a.decided);
+      }
+      const bySource = rateRows(d => (contactById[d.contact_id] || {}).source);
+      const byCompanyType = rateRows(d => (companyById[d.company_id] || {}).type);
+
+      const winRate = decided.length ? Math.round((won.length / decided.length) * 100) : 0;
+      const wonWithFee = won.filter(d => fee(d) > 0);
+      const avgFee = wonWithFee.length ? wonWithFee.reduce((s, d) => s + fee(d), 0) / wonWithFee.length : 0;
+      const totalFee = won.reduce((s, d) => s + fee(d), 0);
+      const totalSup = won.reduce((s, d) => s + sup(d), 0);
+      const supplierShare = (totalFee + totalSup) ? Math.round((totalSup / (totalFee + totalSup)) * 100) : 0;
+
+      const clientMap = {};
+      won.forEach(d => {
+        const id = d.company_id || 'none';
+        if (!clientMap[id]) clientMap[id] = { id, name: id === 'none' ? 'No company set' : ((companyById[id] || {}).name || 'Unknown'), fee: 0, supplier: 0, count: 0 };
+        clientMap[id].fee += fee(d);
+        clientMap[id].supplier += sup(d);
+        clientMap[id].count += 1;
+      });
+      const clients = Object.values(clientMap).sort((a, b) => b.fee - a.fee);
+      const topClients = clients.slice(0, 10);
+      const repeatFee = clients.filter(c => c.count > 1 && c.id !== 'none').reduce((s, c) => s + c.fee, 0);
+      const repeatShare = totalFee ? Math.round((repeatFee / totalFee) * 100) : 0;
+      const topThreeShare = totalFee ? Math.round((clients.slice(0, 3).reduce((s, c) => s + c.fee, 0) / totalFee) * 100) : 0;
+
+      const typeMap = {};
+      wonWithFee.forEach(d => {
+        const types = d.project_types && d.project_types.length ? d.project_types : d.project_type ? [d.project_type] : ['Not recorded'];
+        types.forEach(t => {
+          if (!typeMap[t]) typeMap[t] = { label: t, total: 0, count: 0 };
+          typeMap[t].total += fee(d);
+          typeMap[t].count += 1;
+        });
+      });
+      const typeRows = Object.values(typeMap).map(t => ({ ...t, avg: t.total / t.count })).sort((a, b) => b.avg - a.avg);
+      const maxAvg = Math.max(...typeRows.map(t => t.avg), 1);
+
+      const cardStyle = {background:'var(--surface)',border:'1px solid var(--border)',borderRadius:'var(--radius)',padding:'16px 20px'};
+
+      return (
+        <div className="page-wrap">
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(160px,1fr))',gap:10,marginBottom:24}}>
+            {[
+              { label: 'Win rate', value: winRate + '%', sub: won.length + ' won of ' + decided.length + ' decided', color: 'var(--text)' },
+              { label: 'Average production fee', value: fmt(Math.round(avgFee)), sub: 'across ' + wonWithFee.length + ' won projects', color: 'var(--green)' },
+              { label: 'Repeat-client revenue', value: repeatShare + '%', sub: 'top 3 clients = ' + topThreeShare + '% of fees', color: 'var(--blue)' },
+              { label: 'Supplier share', value: supplierShare + '%', sub: fmt(totalSup) + ' of ' + fmt(totalFee + totalSup) + ' project value', color: 'var(--text)' },
+            ].map(card => (
+              <div key={card.label} style={{background:'var(--surface2)',borderRadius:'var(--radius-md)',padding:'14px 16px'}}>
+                <div style={{fontSize:11,color:'var(--text-2)',marginBottom:4,fontWeight:500}}>{card.label}</div>
+                <div style={{fontSize:22,fontWeight:500,color:card.color,fontVariantNumeric:'tabular-nums'}}>{card.value}</div>
+                <div style={{fontSize:11,color:'var(--text-3)',marginTop:2}}>{card.sub}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:16}}>
+            <RateTable title="Win rate by source" note="Won / decided (won + lost). Source comes from the deal's contact." rows={bySource} />
+            <RateTable title="Win rate by company type" note="Won / decided (won + lost)." rows={byCompanyType} />
+          </div>
+
+          <div style={{...cardStyle,marginBottom:16}}>
+            <div style={{fontSize:13,fontWeight:500,marginBottom:2}}>Revenue by client</div>
+            <div style={{fontSize:11,color:'var(--text-3)',marginBottom:12}}>Won and in-production projects, including archived. Production fees only.</div>
+            {topClients.length === 0 ? (
+              <div style={{fontSize:12,color:'var(--text-3)'}}>No won projects yet</div>
+            ) : topClients.map(c => (
+              <div key={c.id} style={{display:'flex',alignItems:'center',gap:10,padding:'7px 0',borderTop:'1px solid var(--border)',fontSize:12}}>
+                <div style={{flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                  {c.name}
+                  {c.count > 1 && <span style={{marginLeft:8,fontSize:10,color:'var(--blue)',background:'var(--blue-light)',padding:'1px 6px',borderRadius:3}}>Repeat</span>}
+                </div>
+                <div style={{color:'var(--text-3)',minWidth:70,textAlign:'right'}}>{c.count} project{c.count === 1 ? '' : 's'}</div>
+                <div style={{color:'var(--text-3)',minWidth:40,textAlign:'right'}}>{totalFee ? Math.round((c.fee / totalFee) * 100) : 0}%</div>
+                <div style={{fontWeight:500,minWidth:84,textAlign:'right',fontVariantNumeric:'tabular-nums'}}>{fmt(c.fee)}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={cardStyle}>
+            <div style={{fontSize:13,fontWeight:500,marginBottom:2}}>Average production fee by project type</div>
+            <div style={{fontSize:11,color:'var(--text-3)',marginBottom:12}}>Won projects with a fee. A project tagged with several types counts towards each.</div>
+            {typeRows.length === 0 ? (
+              <div style={{fontSize:12,color:'var(--text-3)'}}>No won projects with a fee yet</div>
+            ) : typeRows.map(t => (
+              <div key={t.label} style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
+                <div style={{flex:1,fontSize:12,color:'var(--text-2)'}}>{t.label}</div>
+                <div style={{width:120,height:6,background:'var(--surface2)',borderRadius:3,overflow:'hidden'}}>
+                  <div style={{height:'100%',width:Math.round((t.avg / maxAvg) * 100) + '%',background:'var(--purple)',borderRadius:3}}></div>
+                </div>
+                <div style={{fontSize:12,fontWeight:500,minWidth:70,textAlign:'right',fontVariantNumeric:'tabular-nums'}}>{fmt(Math.round(t.avg))}</div>
+                <div style={{fontSize:11,color:'var(--text-3)',minWidth:30,textAlign:'right'}}>n={t.count}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     // =====================
     // APP SHELL
     // =====================
@@ -2611,6 +2779,7 @@
 
       const NAV = [
         { id: 'dashboard', label: 'Dashboard', icon: '[D]' },
+        { id: 'insights', label: 'Insights', icon: '[I]' },
         { id: 'pipeline', label: 'Pipeline', icon: '[P]' },
         { id: 'diary', label: 'Diary', icon: '[C]' },
         { id: 'archive', label: 'Archive', icon: '[A]' },
@@ -2619,7 +2788,7 @@
         { id: 'companies', label: 'Companies', icon: '[Co]' },
       ];
 
-      const PAGE_TITLES = { dashboard: 'Dashboard', pipeline: 'Pipeline', diary: 'Diary', archive: 'Archive', lost: 'Lost Deals', contacts: 'Contacts', companies: 'Companies' };
+      const PAGE_TITLES = { dashboard: 'Dashboard', insights: 'Insights', pipeline: 'Pipeline', diary: 'Diary', archive: 'Archive', lost: 'Lost Deals', contacts: 'Contacts', companies: 'Companies' };
 
       return (
         <div className="app">
@@ -2649,6 +2818,7 @@
               </div>
             </div>
             {page === 'dashboard' && <DashboardPage />}
+            {page === 'insights' && <InsightsPage />}
             {page === 'diary' && <DiaryPage />}
             {page === 'archive' && <ArchivePage />}
             {page === 'lost' && <LostPage />}
