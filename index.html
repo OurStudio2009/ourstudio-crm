@@ -652,12 +652,16 @@
     const MONTHS = (() => {
       const m = [];
       const now = new Date();
-      for (let i = -2; i < 18; i++) {
+      for (let i = -36; i < 18; i++) {
         const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
         m.push(d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }));
       }
       return m;
     })();
+
+    function monthOptions(current) {
+      return current && !MONTHS.includes(current) ? [current, ...MONTHS] : MONTHS;
+    }
 
     function fmt(n) {
       if (!n && n !== 0) return '--';
@@ -965,14 +969,14 @@
                       <label className="form-label">Start month</label>
                       <select className="form-select" value={form.start_month || ''} onChange={e => set('start_month', e.target.value)}>
                         <option value="">Select...</option>
-                        {MONTHS.map(m => <option key={m}>{m}</option>)}
+                        {monthOptions(form.start_month).map(m => <option key={m}>{m}</option>)}
                       </select>
                     </div>
                     <div className="form-group">
                       <label className="form-label">Delivery month</label>
                       <select className="form-select" value={form.delivery_month || ''} onChange={e => set('delivery_month', e.target.value)}>
                         <option value="">Select...</option>
-                        {MONTHS.map(m => <option key={m}>{m}</option>)}
+                        {monthOptions(form.delivery_month).map(m => <option key={m}>{m}</option>)}
                       </select>
                     </div>
                   </div>
@@ -982,7 +986,7 @@
                       <div key={i} className="fee-alloc-row">
                         <select className="form-select" value={form[`fee_month_${i}_label`] || ''} onChange={e => set(`fee_month_${i}_label`, e.target.value)}>
                           <option value="">Month {i}...</option>
-                          {MONTHS.map(m => <option key={m}>{m}</option>)}
+                          {monthOptions(form[`fee_month_${i}_label`]).map(m => <option key={m}>{m}</option>)}
                         </select>
                         <input className="form-input" type="number" placeholder="£0" value={form[`fee_month_${i}_amount`] || ''} onChange={e => set(`fee_month_${i}_amount`, e.target.value)} />
                       </div>
@@ -2228,12 +2232,18 @@
       const revMap = revenueByMonth();
       const pipMap = pipelineByMonth();
 
-      const monthlyData = targets.map(t => ({
-        label: t.month_label,
-        short: t.month_label.split(' ')[0].slice(0,3) + "'" + t.month_label.split(' ')[1].slice(2),
+      const allMonthLabels = Array.from(new Set([
+        ...targets.map(t => t.month_label),
+        ...Object.keys(revMap),
+        ...Object.keys(pipMap),
+      ])).filter(l => l && l.split(' ').length === 2);
+
+      const monthlyData = allMonthLabels.map(label => ({
+        label,
+        short: label.split(' ')[0].slice(0,3) + "'" + label.split(' ')[1].slice(2),
         target: 35000,
-        revenue: Math.round(revMap[t.month_label] || 0),
-        pipeline: Math.round(pipMap[t.month_label] || 0),
+        revenue: Math.round(revMap[label] || 0),
+        pipeline: Math.round(pipMap[label] || 0),
       })).sort((a,b) => monthIndex(a.label) - monthIndex(b.label));
 
       const quarters = ['Q1','Q2','Q3','Q4'];
